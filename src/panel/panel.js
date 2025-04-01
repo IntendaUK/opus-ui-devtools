@@ -1,52 +1,69 @@
-function createHtmlFromJson (data, parentKey = '', depth = 0) {
+const buildTreeMap = flatNodes => {
+	const childrenMap = new Map();
+	const nodeMap = new Map();
+
+	flatNodes.forEach(node => {
+		nodeMap.set(node.id, node);
+
+		const parentId = node.parentId;
+		if (!childrenMap.has(parentId))
+			childrenMap.set(parentId, []);
+
+		childrenMap.get(parentId).push(node);
+	});
+
+	return {
+		childrenMap,
+		nodeMap
+	};
+};
+
+const createHtmlFromTree = (parentId, childrenMap, depth = 0) => {
+	const nodes = childrenMap.get(parentId) || [];
 	const container = document.createElement('div');
 
-	if (typeof data === 'object' && data !== null) {
-		Object.entries(data).forEach(([key, value]) => {
-			const item = document.createElement('div');
-			item.style.marginLeft = `${depth * 10}px`;
+	nodes.forEach(node => {
+		const line = document.createElement('div');
+		line.className = 'devtools-line';
+		line.style.marginLeft = `${depth * 16}px`;
 
-			if (key === 'id' && typeof value === 'string') {
-				const button = document.createElement('button');
-				button.textContent = `Highlight and Get State: ${value}`;
-				button.onclick = () => {
-					chrome.runtime.sendMessage({
-						action: 'getState',
-						id: value
-					});
-				};
+		//Convert "componentType" to "Component Type"
+		const componentType = node.type[0].toUpperCase() + node.type.substr(1);
 
-				item.innerHTML = `<strong>${key}:</strong> ${value}`;
-				item.appendChild(button);
-			} else if (Array.isArray(value)) {
-				item.innerHTML = `<strong>${key}:</strong>`;
-				value.forEach(child => {
-					item.appendChild(createHtmlFromJson(child, `${parentKey}.${key}`, depth + 1));
-				});
-			} else if (typeof value === 'object' && value !== null) {
-				item.innerHTML = `<strong>${key}:</strong>`;
-				item.appendChild(createHtmlFromJson(value, `${parentKey}.${key}`, depth + 1));
-			} else
-				item.innerHTML = `<strong>${key}:</strong> ${value}`;
+		line.innerHTML = `${componentType} id="<span style="color:var(--accent-color)">${node.id}</span>"`;
 
-			container.appendChild(item);
-		});
-	} else
-		container.innerHTML = data;
+		line.onclick = () => {
+			chrome.runtime.sendMessage({
+				action: 'getState',
+				id: node.id
+			});
+		};
+
+		container.appendChild(line);
+
+		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1);
+		container.appendChild(childContainer);
+	});
 
 	return container;
-}
+};
 
-function displayData (data) {
+const displayData = data => {
 	const container = document.getElementById('data-container');
 	container.innerHTML = '';
-	if (data)
-		container.appendChild(createHtmlFromJson(data));
-	else
-		container.textContent = 'No data received yet.';
-}
 
-function showPopup (message) {
+	if (!Array.isArray(data)) {
+		container.textContent = 'No data received yet.';
+
+		return;
+	}
+
+	const { childrenMap } = buildTreeMap(data);
+	const treeDom = createHtmlFromTree(undefined, childrenMap);
+	container.appendChild(treeDom);
+};
+
+const showPopup = message => {
 	const popup = document.createElement('div');
 	popup.style.position = 'fixed';
 	popup.style.top = '10px';
@@ -62,7 +79,7 @@ function showPopup (message) {
 	setTimeout(() => {
 		popup.remove();
 	}, 3000);
-}
+};
 
 chrome.runtime.onMessage.addListener(message => {
 	if (message.action === 'showState')

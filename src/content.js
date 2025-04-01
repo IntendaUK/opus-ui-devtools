@@ -1,5 +1,18 @@
-if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK)
-	window._OPUS_DEVTOOLS_GLOBAL_HOOK = true;
+const script = document.createElement('script');
+script.textContent = `
+	if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
+		window._OPUS_DEVTOOLS_GLOBAL_HOOK = {
+			onDomChanged: dom => {
+				window.postMessage({
+					type: 'OPUS_JSON_DATA',
+					payload: dom
+				}, '*');
+			}
+		};
+	}
+`;
+(document.head || document.documentElement).appendChild(script);
+script.remove();
 
 window.getState = function (id) {
 	return {
@@ -29,5 +42,3 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		});
 	}
 });
-
-window.postMessage({ type: 'OPUS_FLAG_SET' }, '*');
