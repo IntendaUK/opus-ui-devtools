@@ -138,16 +138,72 @@ body {
 	overflow-wrap: break-word;
 }
 
+.state-property {
+	display: flex;
+	flex-direction: row;
+}
+
 .property-key {
-	color: var(--white);
+	color: var(--scope-color-1);
+	margin-right: 8px;
 }
 
 .state-boolean {
 	color: var(--state-boolean);
 }
 
+.state-boolean-checkbox {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	background-color: var(--hover-bg);
+	position: relative;
+	cursor: pointer;
+	vertical-align: middle;
+	margin-left: 4px;
+}
+
+.state-boolean-checkbox:checked {
+	background-color: var(--state-boolean);
+	border-color: var(--state-boolean);
+}
+
+.state-boolean-checkbox:checked::after {
+	content: '';
+	position: absolute;
+	left: 5px;
+	top: 2px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--bg-color);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
 .state-number {
 	color: var(--state-number);
+}
+
+.state-number-input, .state-string-input {
+	background-color: transparent;
+	color: var(--text-color);
+	border: none;
+	padding: 0px;
+	font-family: var(--font-family);
+	font-size: 14px;
+	width: 150px;
+	outline: none;
+}
+
+.state-number-input {
+	color: var(--state-number);
+}
+
+.state-number-input:focus, .state-string-input:focus {
+	border-color: var(--accent-color);
 }
 
 .state-null,

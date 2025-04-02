@@ -15,6 +15,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		parent: metadataSection
 	});
 
+	// ID
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -22,6 +23,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		parent: metadataSection
 	});
 
+	// Parent ID
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -29,6 +31,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		parent: metadataSection
 	});
 
+	// Index in parent
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -36,6 +39,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		parent: metadataSection
 	});
 
+	// Type
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -43,6 +47,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		parent: metadataSection
 	});
 
+	// Scopes
 	if (domNode.scopes?.length > 0) {
 		const scopeValue = domNode.scopes.join(', ');
 		createElement({
@@ -53,6 +58,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		});
 	}
 
+	// RelId
 	if (domNode.relId) {
 		const relIdValue = domNode.relId;
 		createElement({
@@ -63,6 +69,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		});
 	}
 
+	// Path
 	if (state.path) {
 		createElement({
 			type: 'div',
@@ -72,6 +79,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		});
 	}
 
+	// Re-renders
 	if (state.updates > 0) {
 		createElement({
 			type: 'div',
@@ -81,6 +89,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		});
 	}
 
+	// Tags
 	if (state.tags.length > 0) {
 		createElement({
 			type: 'div',
@@ -177,11 +186,25 @@ const buildSectionScripts = (stateContent, componentId, domNode, state) => {
 		parent: scpsSection
 	});
 
-	createElement({
+	// SCPs are arrays, so they're not editable
+	const scpsContainer = createElement({
 		type: 'div',
 		className: 'state-property',
-		innerHTML: `<span class="state-array">${JSON.stringify(state.scps)}</span>`,
 		parent: scpsSection
+	});
+
+	createElement({
+		type: 'span',
+		className: 'property-key',
+		textContent: 'scps:',
+		parent: scpsContainer
+	});
+
+	createElement({
+		type: 'span',
+		className: 'state-object',
+		textContent: JSON.stringify(state.scps),
+		parent: scpsContainer
 	});
 };
 
@@ -203,24 +226,117 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		if (['id', 'type', 'flows', 'scps', 'path', 'updates', 'parentId', 'indexInParent', 'tags'].includes(key))
 			return;
 
-		let displayValue = value;
-		if (typeof value === 'boolean')
-			displayValue = `<span class="state-boolean">${value}</span>`;
-		 else if (typeof value === 'number')
-			displayValue = `<span class="state-number">${value}</span>`;
-		 else if (value === null)
-			displayValue = '<span class="state-null">null</span>';
-		 else if (value === undefined)
-			displayValue = '<span class="state-undefined">undefined</span>';
-		 else if (typeof value === 'object')
-			displayValue = `<span class="state-object">${JSON.stringify(value)}</span>`;
-
-		createElement({
+		const propertyContainer = createElement({
 			type: 'div',
 			className: 'state-property',
-			innerHTML: `<span class="property-key">${key}:</span> ${displayValue}`,
 			parent: stateSection
 		});
+
+		// Create the property key
+		createElement({
+			type: 'span',
+			className: 'property-key',
+			textContent: `${key}:`,
+			parent: propertyContainer
+		});
+
+		// Add a space after the key
+		propertyContainer.appendChild(document.createTextNode(' '));
+
+		// Handle different value types
+		if (typeof value === 'boolean') {
+			// Create a checkbox for boolean values
+			const checkbox = createElement({
+				type: 'input',
+				attributes: {
+					type: 'checkbox',
+					checked: value
+				},
+				className: 'state-boolean-checkbox',
+				parent: propertyContainer,
+				events: {
+					change: e => {
+						chrome.runtime.sendMessage({
+							action: 'OPUS_ASK_SET_COMPONENT_STATE',
+							data: {
+								target: componentId,
+								key,
+								value: e.target.checked
+							}
+						});
+					}
+				}
+			});
+		} else if (typeof value === 'number') {
+			// Create a number input for numeric values
+			const numberInput = createElement({
+				type: 'input',
+				attributes: {
+					type: 'number',
+					value
+				},
+				className: 'state-number-input',
+				parent: propertyContainer,
+				events: {
+					input: e => {
+						const newValue = e.target.valueAsNumber;
+						chrome.runtime.sendMessage({
+							action: 'OPUS_ASK_SET_COMPONENT_STATE',
+							data: {
+								target: componentId,
+								key,
+								value: newValue
+							}
+						});
+					}
+				}
+			});
+		} else if (typeof value === 'string') {
+			// Create a text input for string values
+			const textInput = createElement({
+				type: 'input',
+				attributes: {
+					type: 'text',
+					value
+				},
+				className: 'state-string-input',
+				parent: propertyContainer,
+				events: {
+					input: e => {
+						chrome.runtime.sendMessage({
+							action: 'OPUS_ASK_SET_COMPONENT_STATE',
+							data: {
+								target: componentId,
+								key,
+								value: e.target.value
+							}
+						});
+					}
+				}
+			});
+		} else if (value === null) {
+			createElement({
+				type: 'span',
+				className: 'state-null',
+				textContent: 'null',
+				parent: propertyContainer
+			});
+		} else if (value === undefined) {
+			createElement({
+				type: 'span',
+				className: 'state-undefined',
+				textContent: 'undefined',
+				parent: propertyContainer
+			});
+		} else if (typeof value === 'object') {
+			// Arrays and objects are not editable
+			createElement({
+				type: 'span',
+				className: 'state-object',
+				textContent: JSON.stringify(value),
+				parent: propertyContainer
+			});
+		}
 	});
 
 	if (state.timestamp) {
@@ -254,7 +370,7 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 		buildSectionFlows(stateContent, componentId, domNode, state);
 
 	if (state.scps?.length > 0)
-		buildSectionFlows(stateContent, componentId, domNode, state);
+		buildSectionScripts(stateContent, componentId, domNode, state);
 };
 
 export { displayStateInSidebar };
