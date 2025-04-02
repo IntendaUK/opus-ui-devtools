@@ -22,6 +22,19 @@ const buildTreeMap = flatNodes => {
 	};
 };
 
+export const selectTreeNode = id => {
+	// Highlight this component
+	highlightSelectedComponent(id);
+
+	// Request state for this component
+	chrome.runtime.sendMessage({
+		action: 'OPUS_ASK_STATE_DATA',
+		data: {
+			id
+		}
+	});
+};
+
 // Create HTML representation of the tree
 const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, parentScopes = []) => {
 	const nodes = childrenMap.get(parentId) || [];
@@ -78,16 +91,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 			},
 			events: {
 				click: () => {
-					// Highlight this component
-					highlightSelectedComponent(node.id);
-
-					// Request state for this component
-					chrome.runtime.sendMessage({
-						action: 'OPUS_ASK_STATE_DATA',
-						data: {
-							id: node.id
-						}
-					});
+					selectTreeNode(node.id);
 				},
 				mouseenter: () => {
 					chrome.runtime.sendMessage({

@@ -1,5 +1,6 @@
 import { createElement } from './domHelper.js';
 import { getScopeColor } from './colors.js';
+import { selectTreeNode } from './treeBuilder.js';
 
 const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	const metadataSection = createElement({
@@ -130,7 +131,16 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 			type: 'div',
 			className: 'flow-block',
 			innerHTML: `${idFrom}.${flow.fromKey}`,
-			parent: flowItem
+			parent: flowItem,
+			events: {
+				click: () => {
+					selectTreeNode(flow.from);
+
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW'
+					});
+				}
+			}
 		});
 		
 		// Arrow
@@ -146,7 +156,16 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 			type: 'div',
 			className: 'flow-block',
 			innerHTML: `${idTo}.${flow.toKey}`,
-			parent: flowItem
+			parent: flowItem,
+			events: {
+				click: () => {
+					selectTreeNode(flow.to);
+
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW'
+					});
+				}
+			}
 		});
 	});
 };
