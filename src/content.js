@@ -13,7 +13,9 @@ script.textContent = `
 		window.addEventListener('message', event => {
 			if (event.data.type === 'OPUS_ASK_STATE_DATA') {
 				const id = event.data.data.id;
-				const state = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
+				const originalState = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
+
+				const state = JSON.parse(JSON.stringify(originalState));
 
 				window.postMessage({
 					type: 'OPUS_GET_STATE_DATA',
