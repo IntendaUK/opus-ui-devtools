@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function, max-len, max-lines */
+
 import { getScopeColorByDepth } from './colors.js';
 import { createElement } from './domHelper.js';
 
@@ -22,6 +24,20 @@ const buildTreeMap = flatNodes => {
 	};
 };
 
+// Highlight the selected component
+const highlightSelectedComponent = selectedId => {
+	// Remove highlight from all components
+	document.querySelectorAll('.devtools-line').forEach(element => {
+		element.classList.remove('selected');
+	});
+
+	// Find and highlight the selected component
+	document.querySelectorAll('.devtools-line').forEach(element => {
+		if (element.dataset.componentId === selectedId)
+			element.classList.add('selected');
+	});
+};
+
 export const selectTreeNode = id => {
 	// Highlight this component
 	highlightSelectedComponent(id);
@@ -34,7 +50,7 @@ export const selectTreeNode = id => {
 };
 
 // Create HTML representation of the tree
-const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, parentScopes = []) => {
+const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) => {
 	const nodes = childrenMap.get(parentId) || [];
 	const container = createElement({
 		type: 'div',
@@ -65,7 +81,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 		// Add scopes if present
 		if (nodeScopes.length === 1)
 			displayText += ` <span>scope=<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span></span>`;
-		 else if (nodeScopes.length > 1)
+		else if (nodeScopes.length > 1)
 			displayText += ` <span>scope=[<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span>]</span>`;
 
 		// Add relId if present
@@ -193,20 +209,6 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 	});
 
 	return container;
-};
-
-// Highlight the selected component
-const highlightSelectedComponent = selectedId => {
-	// Remove highlight from all components
-	document.querySelectorAll('.devtools-line').forEach(element => {
-		element.classList.remove('selected');
-	});
-
-	// Find and highlight the selected component
-	document.querySelectorAll('.devtools-line').forEach(element => {
-		if (element.dataset.componentId === selectedId)
-			element.classList.add('selected');
-	});
 };
 
 export {

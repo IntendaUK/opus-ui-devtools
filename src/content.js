@@ -47,6 +47,14 @@ script.textContent = `
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideFlowArrow();
 			else if (event.data.type === 'OPUS_ASK_SET_COMPONENT_STATE')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.setComponentState(event.data.data);
+			else if (event.data.type === 'OPUS_ASK_COMPONENT_TREE') {
+				const componentTree = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getComponentTree();
+
+				window.postMessage({
+					type: 'OPUS_GET_COMPONENT_TREE',
+					data: componentTree
+				}, '*');
+			}
 		});
 	}
 `;

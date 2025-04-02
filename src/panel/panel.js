@@ -47,8 +47,11 @@ chrome.runtime.onMessage.addListener(message => {
 		selectTreeNode(message.data.id);
 
 		toggleSelectButton(false);
-	}
+	} else if (message.action === 'OPUS_GET_COMPONENT_TREE')
+		displayData(message.data);
 });
+
+chrome.runtime.sendMessage({ action: 'OPUS_ASK_COMPONENT_TREE' });
 
 // Search functionality
 const updateSearchResultsCount = () => {
