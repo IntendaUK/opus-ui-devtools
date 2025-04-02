@@ -126,6 +126,27 @@ body {
 	font-size: 12px;
 }
 
+/* Flow visualization styles */
+.flow-item {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.flow-block {
+	padding: 4px 8px;
+	border-radius: 4px;
+	color: var(--bg-color);
+	font-size: 10px;
+	font-family: var(--font-mono);
+	background-color: var(--scope-color-1);
+}
+
+.flow-arrow {
+	margin: 0 8px;
+	color: var(--text-color);
+}
+
 .devtools-line {
 	cursor: pointer;
 	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;;

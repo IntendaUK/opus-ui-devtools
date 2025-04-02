@@ -1,4 +1,5 @@
 import { createElement } from './domHelper.js';
+import { getScopeColor } from './colors.js';
 
 const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	const metadataSection = createElement({
@@ -90,6 +91,53 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	}
 };
 
+const buildSectionFlows = (stateContent, componentId, domNode, state) => {
+	const flowsSection = createElement({
+		type: 'div',
+		className: 'sidebar-section',
+		parent: stateContent
+	});
+	
+	createElement({
+		type: 'div',
+		className: 'section-header',
+		textContent: 'Flows',
+		parent: flowsSection
+	});
+	
+	state.flows.forEach(flow => {
+		const flowItem = createElement({
+			type: 'div',
+			className: 'flow-item',
+			parent: flowsSection
+		});
+		
+		const idFrom = flow.from.length > 9 ? `${flow.from.substring(0, 8)}&hellip;` : flow.from;
+		createElement({
+			type: 'div',
+			className: 'flow-block',
+			innerHTML: `${idFrom}.${flow.fromKey}`,
+			parent: flowItem
+		});
+		
+		// Arrow
+		createElement({
+			type: 'div',
+			className: 'flow-arrow',
+			textContent: '→',
+			parent: flowItem
+		});
+		
+		const idTo = flow.to.length > 9 ? `${flow.to.substring(0, 8)}&hellip;` : flow.to;
+		createElement({
+			type: 'div',
+			className: 'flow-block',
+			innerHTML: `${idTo}.${flow.toKey}`,
+			parent: flowItem
+		});
+	});
+};
+
 const buildSectionState = (stateContent, componentId, domNode, state) => {
 	const stateSection = createElement({
 		type: 'div',
@@ -129,28 +177,6 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		});
 	});
 	
-	if (state.flows) {
-		const flowsSection = createElement({
-			type: 'div',
-			className: 'sidebar-section',
-			parent: stateContent
-		});
-		
-		createElement({
-			type: 'div',
-			className: 'section-header',
-			textContent: 'Flows',
-			parent: flowsSection
-		});
-		
-		createElement({
-			type: 'div',
-			className: 'state-property',
-			innerHTML: `<span class="state-array">${JSON.stringify(state.flows)}</span>`,
-			parent: flowsSection
-		});
-	}
-	
 	if (state.scps) {
 		const scpsSection = createElement({
 			type: 'div',
@@ -173,11 +199,11 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		});
 	}
 
-	if (data.timestamp) {
+	if (state.timestamp) {
 		createElement({
 			type: 'div',
 			className: 'state-timestamp',
-			innerHTML: `<small>Updated: ${new Date(data.timestamp).toLocaleTimeString()}</small>`,
+			innerHTML: `<small>Updated: ${new Date(state.timestamp).toLocaleTimeString()}</small>`,
 			parent: stateContent
 		});
 	}
@@ -198,6 +224,9 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 	buildSectionInfo(stateContent, componentId, domNode, state);
 	
 	buildSectionState(stateContent, componentId, domNode, state);
+
+	if (state.flows?.length > 0)
+		buildSectionFlows(stateContent, componentId, domNode, state);
 };
 
 export {
