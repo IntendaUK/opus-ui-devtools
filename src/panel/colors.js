@@ -3,12 +3,7 @@ const scopeColors = [
 	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-1').trim(),
 	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-2').trim(),
 	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-3').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-4').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-5').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-6').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-7').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-8').trim(),
-	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-9').trim()
+	getComputedStyle(document.documentElement).getPropertyValue('--scope-color-4').trim()
 ];
 
 // Generate a pastel color for a given string (scope name)

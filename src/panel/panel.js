@@ -1,17 +1,22 @@
 import { buildTreeMap, createHtmlFromTree, highlightSelectedComponent } from './treeBuilder.js';
 import { displayStateInSidebar } from './stateDisplay.js';
+import { createElement } from './domHelper.js';
+
+let domData;
 
 // Function to display the component tree
 const displayData = data => {
+	domData = data;
+
 	const container = document.getElementById('data-container');
 	container.innerHTML = '';
 
-	if (!Array.isArray(data)) {
+	if (!Array.isArray(domData)) {
 		container.textContent = 'No data received yet.';
 		return;
 	}
 
-	const { childrenMap } = buildTreeMap(data);
+	const { childrenMap } = buildTreeMap(domData);
 	const treeDom = createHtmlFromTree(undefined, childrenMap);
 	container.appendChild(treeDom);
 };
@@ -20,7 +25,10 @@ const displayData = data => {
 chrome.runtime.onMessage.addListener(message => {
 	if (message.action === 'showState') {
 		const componentId = message.id || 'Unknown';
-		displayStateInSidebar(message.data, componentId);
+
+		const domNode = domData.find(f => f.id === componentId);
+
+		displayStateInSidebar(message.data, componentId, domNode);
 	}
 });
 
