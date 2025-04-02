@@ -1,44 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<style>
-			:root {
-				--bg-color: #1e1e1e;
-				--text-color: #d4d4d4;
-				--hover-bg: #2a2a2a;
-				--accent-color: #80cbc4;
-				--font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-				--font-mono: 'Courier New', Courier, monospace;
-			}
-
-			body {
-				margin: 0;
-				padding: 12px;
-				background-color: var(--bg-color);
-				color: var(--text-color);
-				font-family: var(--font-family);
-				font-size: 14px;
-			}
-
-			#data-container {
-				overflow-y: auto;
-				max-height: 100vh;
-			}
-
-			.devtools-line {
-				cursor: pointer;
-				font-family: var(--font-mono);
-				padding: 6px 6px;
-				user-select: none;
-			}
-
-			.devtools-line:hover {
-				background-color: var(--hover-bg);
-			}
-		</style>
+		<link rel="stylesheet" href="panel.css">
 	</head>
 	<body>
-		<div id="data-container">Waiting for data...</div>
-		<script src="panel.js"></script>
+		<div class="panel-container">
+			<div id="data-container">Waiting for data...</div>
+			<div id="state-sidebar">
+				<div class="sidebar-header">Component State</div>
+				<div id="state-content">Select a component to view its state</div>
+			</div>
+		</div>
+		<script type="module" src="panel.js"></script>
 	</body>
 </html>

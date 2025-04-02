@@ -25,7 +25,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action === 'showState') {
 		chrome.runtime.sendMessage({
 			action: 'showState',
-			data: jsonData
+			data: message.data,
+			id: message.data.id
 		});
 	}
 });
