@@ -109,7 +109,20 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 		const flowItem = createElement({
 			type: 'div',
 			className: 'flow-item',
-			parent: flowsSection
+			parent: flowsSection,
+			events: {
+				mouseenter: () => {
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_SHOW_FLOW',
+						data: flow
+					});
+				},
+				mouseleave: () => {
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW'
+					});
+				}
+			}
 		});
 		
 		const idFrom = flow.from.length > 9 ? `${flow.from.substring(0, 8)}&hellip;` : flow.from;

@@ -26,6 +26,10 @@ script.textContent = `
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
 			else if (event.data.type === 'OPUS_ASK_HIDE_OVERLAY')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideOverlay();
+			else if (event.data.type === 'OPUS_ASK_SHOW_FLOW')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showFlowArrow(event.data.data);
+			else if (event.data.type === 'OPUS_ASK_HIDE_FLOW')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideFlowArrow();
 		});
 	}
 `;
