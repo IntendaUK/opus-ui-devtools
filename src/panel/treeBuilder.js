@@ -48,21 +48,21 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 		const displayId = node.id.length > 9 ? `${node.id.substring(0, 8)}&hellip;` : node.id;
 		
 		// Build the display string
-		let displayText = `${componentType} id=<span style="color:var(--accent-color)">${displayId}</span>`;
+		let displayText = `${componentType} <span>id=<span style="color:var(--accent-color)">${displayId}</span></span>`;
 		
 		// Get node scopes or empty array if none
 		const nodeScopes = node.scopes || [];
 		
 		// Add scopes if present
 		if (nodeScopes.length === 1) {
-			displayText += ` scope=<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span>`;
+			displayText += ` <span>scope=<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span></span>`;
 		} else if (nodeScopes.length > 1) {
-			displayText += ` scope=[<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span>]`;
+			displayText += ` <span>scope=[<span style="color:var(--accent-color)">${nodeScopes.join(', ')}</span>]</span>`;
 		}
 		
 		// Add relId if present
 		if (node.relId) {
-			displayText += ` relId=<span style="color:var(--accent-color)">${node.relId}</span>`;
+			displayText += ` <span>relId=<span style="color:var(--accent-color)">${node.relId}</span></span>`;
 		}
 		
 		// Create the line element for the node content
@@ -105,6 +105,51 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 			},
 			parent: nodeContainer
 		});
+		
+		// Add indicators for hasScripts and hasFlows
+		if (node.hasScripts) {
+			createElement({
+				type: 'div',
+				className: 'indicator-badge',
+				textContent: 'S',
+				style: {
+					backgroundColor: 'var(--scope-color-1)',
+					color: 'var(--bg-color)',
+					borderRadius: '4px',
+					padding: '1px 4px',
+					fontSize: '10px',
+					fontWeight: 'bold',
+					marginLeft: '6px',
+					display: 'inline-block'
+				},
+				attributes: {
+					title: 'Has Scripts'
+				},
+				parent: line
+			});
+		}
+		
+		if (node.hasFlows) {
+			createElement({
+				type: 'div',
+				className: 'indicator-badge',
+				textContent: 'F',
+				style: {
+					backgroundColor: 'var(--scope-color-3)',
+					color: 'var(--bg-color)',
+					borderRadius: '4px',
+					padding: '1px 4px',
+					fontSize: '10px',
+					fontWeight: 'bold',
+					marginLeft: '6px',
+					display: 'inline-block'
+				},
+				attributes: {
+					title: 'Has Flows'
+				},
+				parent: line
+			});
+		}
 		
 		// Add vertical scope lines for this node
 		if (nodeScopes.length > 0) {

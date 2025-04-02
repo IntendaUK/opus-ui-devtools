@@ -138,6 +138,28 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 	});
 };
 
+const buildSectionScripts = (stateContent, componentId, domNode, state) => {
+	const scpsSection = createElement({
+		type: 'div',
+		className: 'sidebar-section',
+		parent: stateContent
+	});
+	
+	createElement({
+		type: 'div',
+		className: 'section-header',
+		textContent: 'SCPs',
+		parent: scpsSection
+	});
+	
+	createElement({
+		type: 'div',
+		className: 'state-property',
+		innerHTML: `<span class="state-array">${JSON.stringify(state.scps)}</span>`,
+		parent: scpsSection
+	});
+};
+
 const buildSectionState = (stateContent, componentId, domNode, state) => {
 	const stateSection = createElement({
 		type: 'div',
@@ -177,28 +199,6 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		});
 	});
 	
-	if (state.scps) {
-		const scpsSection = createElement({
-			type: 'div',
-			className: 'sidebar-section',
-			parent: stateContent
-		});
-		
-		createElement({
-			type: 'div',
-			className: 'section-header',
-			textContent: 'SCPs',
-			parent: scpsSection
-		});
-		
-		createElement({
-			type: 'div',
-			className: 'state-property',
-			innerHTML: `<span class="state-array">${JSON.stringify(state.scps)}</span>`,
-			parent: scpsSection
-		});
-	}
-
 	if (state.timestamp) {
 		createElement({
 			type: 'div',
@@ -226,6 +226,9 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 	buildSectionState(stateContent, componentId, domNode, state);
 
 	if (state.flows?.length > 0)
+		buildSectionFlows(stateContent, componentId, domNode, state);
+
+	if (state.scps?.length > 0)
 		buildSectionFlows(stateContent, componentId, domNode, state);
 };
 
