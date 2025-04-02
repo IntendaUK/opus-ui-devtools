@@ -7,6 +7,15 @@ script.textContent = `
 					type: 'OPUS_GET_JSON_DATA',
 					data: dom
 				}, '*');
+			},
+
+			onSelectComponentClick: id => {
+				window.postMessage({
+					type: 'OPUS_GET_SELECT_COMPONENT',
+					data: {
+						id
+					}
+				}, '*');
 			}
 		};
 
@@ -28,6 +37,10 @@ script.textContent = `
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
 			else if (event.data.type === 'OPUS_ASK_HIDE_OVERLAY')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideOverlay();
+			else if (event.data.type === 'OPUS_ASK_SHOW_COMPONENT_SELECTOR')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showComponentSelector();
+			else if (event.data.type === 'OPUS_ASK_HIDE_COMPONENT_SELECTOR')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideComponentSelector();
 			else if (event.data.type === 'OPUS_ASK_SHOW_FLOW')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showFlowArrow(event.data.data);
 			else if (event.data.type === 'OPUS_ASK_HIDE_FLOW')

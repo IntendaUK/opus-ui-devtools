@@ -1,5 +1,4 @@
 import { createElement } from './domHelper.js';
-import { getScopeColor } from './colors.js';
 import { selectTreeNode } from './treeBuilder.js';
 
 const buildSectionInfo = (stateContent, componentId, domNode, state) => {
@@ -15,7 +14,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		textContent: 'Component Info',
 		parent: metadataSection
 	});
-	
+
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -43,7 +42,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 		innerHTML: `<span class="property-key">type:</span> ${state.type}`,
 		parent: metadataSection
 	});
-	
+
 	if (domNode.scopes?.length > 0) {
 		const scopeValue = domNode.scopes.join(', ');
 		createElement({
@@ -53,7 +52,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 			parent: metadataSection
 		});
 	}
-	
+
 	if (domNode.relId) {
 		const relIdValue = domNode.relId;
 		createElement({
@@ -63,7 +62,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 			parent: metadataSection
 		});
 	}
-	
+
 	if (state.path) {
 		createElement({
 			type: 'div',
@@ -98,14 +97,14 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 		className: 'sidebar-section',
 		parent: stateContent
 	});
-	
+
 	createElement({
 		type: 'div',
 		className: 'section-header',
 		textContent: 'Flows',
 		parent: flowsSection
 	});
-	
+
 	state.flows.forEach(flow => {
 		const flowItem = createElement({
 			type: 'div',
@@ -119,13 +118,11 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 					});
 				},
 				mouseleave: () => {
-					chrome.runtime.sendMessage({
-						action: 'OPUS_ASK_HIDE_FLOW'
-					});
+					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
 				}
 			}
 		});
-		
+
 		const idFrom = flow.from.length > 9 ? `${flow.from.substring(0, 8)}&hellip;` : flow.from;
 		createElement({
 			type: 'div',
@@ -136,13 +133,11 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 				click: () => {
 					selectTreeNode(flow.from);
 
-					chrome.runtime.sendMessage({
-						action: 'OPUS_ASK_HIDE_FLOW'
-					});
+					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
 				}
 			}
 		});
-		
+
 		// Arrow
 		createElement({
 			type: 'div',
@@ -150,7 +145,7 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 			textContent: '→',
 			parent: flowItem
 		});
-		
+
 		const idTo = flow.to.length > 9 ? `${flow.to.substring(0, 8)}&hellip;` : flow.to;
 		createElement({
 			type: 'div',
@@ -161,9 +156,7 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 				click: () => {
 					selectTreeNode(flow.to);
 
-					chrome.runtime.sendMessage({
-						action: 'OPUS_ASK_HIDE_FLOW'
-					});
+					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
 				}
 			}
 		});
@@ -176,14 +169,14 @@ const buildSectionScripts = (stateContent, componentId, domNode, state) => {
 		className: 'sidebar-section',
 		parent: stateContent
 	});
-	
+
 	createElement({
 		type: 'div',
 		className: 'section-header',
 		textContent: 'SCPs',
 		parent: scpsSection
 	});
-	
+
 	createElement({
 		type: 'div',
 		className: 'state-property',
@@ -205,24 +198,23 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		textContent: 'State',
 		parent: stateSection
 	});
-	
+
 	Object.entries(state).forEach(([key, value]) => {
 		if (['id', 'type', 'flows', 'scps', 'path', 'updates', 'parentId', 'indexInParent', 'tags'].includes(key))
 			return;
-		
+
 		let displayValue = value;
-		if (typeof value === 'boolean') {
+		if (typeof value === 'boolean')
 			displayValue = `<span class="state-boolean">${value}</span>`;
-		} else if (typeof value === 'number') {
+		 else if (typeof value === 'number')
 			displayValue = `<span class="state-number">${value}</span>`;
-		} else if (value === null) {
-			displayValue = `<span class="state-null">null</span>`;
-		} else if (value === undefined) {
-			displayValue = `<span class="state-undefined">undefined</span>`;
-		} else if (typeof value === 'object') {
+		 else if (value === null)
+			displayValue = '<span class="state-null">null</span>';
+		 else if (value === undefined)
+			displayValue = '<span class="state-undefined">undefined</span>';
+		 else if (typeof value === 'object')
 			displayValue = `<span class="state-object">${JSON.stringify(value)}</span>`;
-		}
-		
+
 		createElement({
 			type: 'div',
 			className: 'state-property',
@@ -230,7 +222,7 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 			parent: stateSection
 		});
 	});
-	
+
 	if (state.timestamp) {
 		createElement({
 			type: 'div',
@@ -248,6 +240,7 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 
 	if (!data) {
 		stateContent.textContent = 'No state available for this component';
+
 		return;
 	}
 
@@ -264,6 +257,4 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 		buildSectionFlows(stateContent, componentId, domNode, state);
 };
 
-export {
-	displayStateInSidebar
-};
+export { displayStateInSidebar };
