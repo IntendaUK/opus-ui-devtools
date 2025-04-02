@@ -5,9 +5,17 @@
 	</head>
 	<body>
 		<div class="panel-container">
-			<div id="data-container">Waiting for data...</div>
-			<div id="state-sidebar">
-				<div id="state-content">Select a component to view its state</div>
+			<div id="search-container">
+				<div class="search-wrapper">
+					<input type="text" id="search-input" placeholder="Search by id/type..." />
+					<div id="search-results-count"></div>
+				</div>
+			</div>
+			<div class="content-container">
+				<div id="data-container">Waiting for data...</div>
+				<div id="state-sidebar">
+					<div id="state-content">Select a component to view its state</div>
+				</div>
 			</div>
 		</div>
 		<script type="module" src="panel.js"></script>

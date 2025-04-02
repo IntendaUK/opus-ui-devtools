@@ -37,7 +37,49 @@ body {
 
 .panel-container {
 	display: flex;
+	flex-direction: column;
 	height: 100vh;
+}
+
+.content-container {
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+}
+
+#search-container {
+	padding: 12px;
+	border-bottom: 1px solid var(--border-color);
+	background-color: var(--bg-color);
+}
+
+.search-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+#search-input {
+	flex: 1;
+	padding: 6px 10px;
+	background-color: var(--hover-bg);
+	color: var(--text-color);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-family: var(--font-family);
+	font-size: 14px;
+	outline: none;
+}
+
+#search-input:focus {
+	border-color: var(--accent-color);
+}
+
+#search-results-count {
+	margin-left: 8px;
+	font-size: 12px;
+	color: var(--text-color);
+	min-width: 60px;
 }
 
 #data-container {
