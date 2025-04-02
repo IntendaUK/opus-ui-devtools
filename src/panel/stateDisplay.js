@@ -144,7 +144,7 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 		className: 'sidebar-section',
 		parent: stateContent
 	});
-	
+
 	createElement({
 		type: 'div',
 		className: 'section-header',
@@ -220,9 +220,9 @@ const displayStateInSidebar = (data, componentId, domNode) => {
 	}
 
 	const state = data.state;
-	
+
 	buildSectionInfo(stateContent, componentId, domNode, state);
-	
+
 	buildSectionState(stateContent, componentId, domNode, state);
 
 	if (state.flows?.length > 0)

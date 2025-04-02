@@ -4,60 +4,54 @@ script.textContent = `
 		window._OPUS_DEVTOOLS_GLOBAL_HOOK = {
 			onDomChanged: dom => {
 				window.postMessage({
-					type: 'OPUS_JSON_DATA',
-					payload: dom
+					type: 'OPUS_GET_JSON_DATA',
+					data: dom
 				}, '*');
 			}
 		};
 
-		window.addEventListener('message', function (event) {
-			if (event.source !== window || !event.data || event.data.type !== 'OPUS_GET_STATE_REQUEST') return;
+		window.addEventListener('message', event => {
+			if (event.data.type === 'OPUS_ASK_STATE_DATA') {
+				const id = event.data.data.id;
+				const state = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
 
-			const id = event.data.id;
-			const result = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
-
-			window.postMessage({
-				type: 'OPUS_GET_STATE_RESPONSE',
-				id,
-				result
-			}, '*');
+				window.postMessage({
+					type: 'OPUS_GET_STATE_DATA',
+					data: {
+						id,
+						state
+					}
+				}, '*');
+			} else if (event.data.type === 'OPUS_ASK_SHOW_OVERLAY')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
+			else if (event.data.type === 'OPUS_ASK_HIDE_OVERLAY')
+				window._OPUS_DEVTOOLS_GLOBAL_HOOK.hideOverlay();
 		});
 	}
 `;
 (document.head || document.documentElement).appendChild(script);
 script.remove();
 
+// Browser Tab -> Devtools (BG)
 window.addEventListener('message', event => {
-	if (event.source !== window || !event.data || event.data.type !== 'OPUS_JSON_DATA')
+	if (event.source !== window || !event.data)
 		return;
 
-	chrome.runtime.sendMessage({
-		action: 'sendDataToDevtools',
-		data: event.data.payload
-	});
-});
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (message.action === 'getState' && message.id) {
-		// Send message into the page context
-		window.postMessage({
-			type: 'OPUS_GET_STATE_REQUEST',
-			id: message.id
-		}, '*');
+	if (typeof(event.data.type) === 'string' && event.data.type.indexOf('OPUS_GET') === 0) {
+		chrome.runtime.sendMessage({
+			action: event.data.type,
+			data: event.data.data
+		});
 	}
 });
 
-// Listen for response from the page context
-window.addEventListener('message', event => {
-	if (
-		event.source !== window ||
-		!event.data ||
-		event.data.type !== 'OPUS_GET_STATE_RESPONSE'
-	)
+// Devtools (BG) -> Browser Tab (The script at the top of this file)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action.indexOf('OPUS_ASK') !== 0)
 		return;
 
-	chrome.runtime.sendMessage({
-		action: 'showState',
-		data: event.data.result
+	window.postMessage({
+		type: message.action,
+		data: message.data
 	});
 });

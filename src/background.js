@@ -1,45 +1,18 @@
 let jsonData = {};
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (message.action === 'sendDataToDevtools') {
-		jsonData = message.data;
-
-		chrome.runtime.sendMessage({
-			action: 'updatePanel',
-			data: jsonData
-		});
-	}
-
-	if (message.action === 'getState' && message.id) {
-		chrome.tabs.query({
-			active: true,
-			currentWindow: true
-		}, tabs => {
+chrome.runtime.onMessage.addListener(message => {
+	if (message.action.indexOf('OPUS_ASK') === 0) {
+		chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
 			chrome.tabs.sendMessage(tabs[0].id, {
-				action: 'getState',
-				id: message.id
+				action: message.action,
+				data: message.data
 			});
 		});
-	}
-
-	if (message.action === 'showState') {
+	} else if (message.action.indexOf('OPUS_GET') === 0) {
 		chrome.runtime.sendMessage({
-			action: 'showState',
-			data: message.data,
-			id: message.data.id
+			action: message.action,
+			data: message.data
 		});
 	}
 });
 
-chrome.runtime.onConnect.addListener(port => {
-	if (port.name === 'devtools') {
-		port.onMessage.addListener(msg => {
-			if (msg.action === 'requestData') {
-				port.postMessage({
-					action: 'loadData',
-					data: jsonData
-				});
-			}
-		});
-	}
-});

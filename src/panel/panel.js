@@ -23,12 +23,17 @@ const displayData = data => {
 
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener(message => {
-	if (message.action === 'showState') {
-		const componentId = message.id || 'Unknown';
+	if (message.action === 'OPUS_GET_JSON_DATA')
+		displayData(message.data);
+});
 
-		const domNode = domData.find(f => f.id === componentId);
+chrome.runtime.onMessage.addListener(message => {
+	if (message.action === 'OPUS_GET_STATE_DATA') {
+		const { data: { id, state } } = message;
 
-		displayStateInSidebar(message.data, componentId, domNode);
+		const domNode = domData.find(f => f.id === id);
+
+		displayStateInSidebar(state, id, domNode);
 	}
 });
 

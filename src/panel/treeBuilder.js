@@ -80,11 +80,26 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 				click: () => {
 					// Highlight this component
 					highlightSelectedComponent(node.id);
-					
+
 					// Request state for this component
 					chrome.runtime.sendMessage({
-						action: 'getState',
-						id: node.id
+						action: 'OPUS_ASK_STATE_DATA',
+						data: {
+							id: node.id
+						}
+					});
+				},
+				mouseenter: () => {
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_SHOW_OVERLAY',
+						data: {
+							id: node.id
+						}
+					});
+				},
+				mouseleave: () => {
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_OVERLAY'
 					});
 				}
 			},
