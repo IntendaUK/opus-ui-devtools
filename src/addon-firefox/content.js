@@ -54,8 +54,29 @@ script.textContent = `
 					type: 'OPUS_GET_COMPONENT_TREE',
 					data: componentTree
 				}, '*');
+			} else if (event.data.type === 'OPUS_ASK_IS_OPUS_APP') {
+				const delayBetweenAttempts = 300;
+				let attemptsLeft = 10;
+
+				const checkIfOpusExists = () => {
+					attemptsLeft--;
+
+					if (!!window.opus) {
+						window.postMessage({
+							type: 'OPUS_GET_IS_OPUS_APP',
+							data: {
+								result: !!window.opus
+							}
+						});
+					} else if (attemptsLeft > 0)
+						setTimeout(checkIfOpusExists, delayBetweenAttempts);
+				};
+
+				setTimeout(checkIfOpusExists, delayBetweenAttempts);
 			}
 		});
+
+		window.postMessage({ type: 'OPUS_GET_ADDON_IS_READY' });
 	}
 `;
 (document.head || document.documentElement).appendChild(script);
@@ -66,7 +87,12 @@ window.addEventListener('message', event => {
 	if (event.source !== window || !event.data)
 		return;
 
-	if (typeof(event.data.type) === 'string' && event.data.type.indexOf('OPUS_GET') === 0) {
+	if (event.data.type === 'OPUS_CHECK_EXISTS') {
+		chrome.runtime.sendMessage({
+			action: event.data.type,
+			data: event.data.data
+		});
+	} else if (typeof(event.data.type) === 'string' && event.data.type.indexOf('OPUS_GET') === 0) {
 		chrome.runtime.sendMessage({
 			action: event.data.type,
 			data: event.data.data

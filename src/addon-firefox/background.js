@@ -1,8 +1,9 @@
-let jsonData = {};
-
 chrome.runtime.onMessage.addListener(message => {
 	if (message.action.indexOf('OPUS_ASK') === 0) {
-		chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+		chrome.tabs.query({
+			active: true,
+			currentWindow: true
+		}, tabs => {
 			chrome.tabs.sendMessage(tabs[0].id, {
 				action: message.action,
 				data: message.data
@@ -15,4 +16,3 @@ chrome.runtime.onMessage.addListener(message => {
 		});
 	}
 });
-
