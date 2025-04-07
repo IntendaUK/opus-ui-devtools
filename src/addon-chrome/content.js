@@ -61,11 +61,11 @@ script.textContent = `
 				const checkIfOpusExists = () => {
 					attemptsLeft--;
 
-					if (!!window.opus || !!document.querySelector('#POPOVERS.cpnContainerSimple')) {
+					if (!!window.opus) {
 						window.postMessage({
 							type: 'OPUS_GET_IS_OPUS_APP',
 							data: {
-								result: true
+								result: !!window.opus
 							}
 						});
 					} else if (attemptsLeft > 0)
