@@ -33,7 +33,9 @@ const findMatches = searchTerm => {
 	domData.forEach(node => {
 		if (
 			node.id.toLowerCase().includes(searchTerm) ||
-			node.type.toLowerCase().includes(searchTerm)
+			node.type.toLowerCase().includes(searchTerm) ||
+			node.scopes.some(f => f.toLowerCase().includes(searchTerm)) ||
+			node.relId?.includes(searchTerm)
 		)
 			searchMatches.push(node.id);
 	});

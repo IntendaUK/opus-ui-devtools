@@ -1,8 +1,5 @@
-* Jump to component in the DOM when using the component selector
-* Collapse/expand component trees
 * Pretty render genStyles
 * See current flow value
-* Search by scope/relId
 * Sort properties by name
 * Base property data type on propSpec, not on value
 * Tree stays the same if you open devtools for a different website while you already have another one open
@@ -12,5 +9,4 @@
 * Add diagnostics to scripts from devtools
 * See diagnostic results in devtools
 * Click to copy component path
-* Input states have refs in them so they give cyclic errors
 * Clicking on flows source/target with a scoped id doesn't work
