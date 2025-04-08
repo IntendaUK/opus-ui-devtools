@@ -279,12 +279,12 @@ body {
 
 .devtools-line {
 	cursor: pointer;
-	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;;
-	padding: 2px 2px 2px 12px;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+	padding: 2px 2px 2px 0;
 	user-select: none;
 	display: flex;
 	align-items: center;
-	gap: 6px;;
+	gap: 6px;
 }
 
 .devtools-line:hover {
@@ -304,6 +304,35 @@ body {
 	position: relative;
 	min-height: 24px;
 	/* Ensure minimum height for nodes */
+}
+
+.line-container {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.toggle-icon {
+	cursor: pointer;
+	user-select: none;
+	width: 12px;
+	text-align: center;
+	color: var(--text-color);
+	transition: transform 0.2s ease;
+	display: inline-block;
+}
+
+.toggle-icon:hover {
+	color: var(--accent-color);
+}
+
+.toggle-icon.collapsed {
+	transform: rotate(-90deg);
+}
+
+.child-container {
+	position: relative;
+	transition: height 0.2s ease;
 }
 
 .child-wrapper {
