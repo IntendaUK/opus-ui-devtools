@@ -50,17 +50,8 @@ const highlightNextMatch = () => {
 	currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
 	const matchId = searchMatches[currentMatchIndex];
 
-	// Highlight the component
-	selectTreeNode(matchId);
-
-	// Find the element and scroll to it
-	const matchElement = document.querySelector(`.devtools-line[data-component-id="${matchId}"]`);
-	if (matchElement) {
-		matchElement.scrollIntoView({
-			behavior: 'smooth',
-			block: 'center'
-		});
-	}
+	// Highlight the component and scroll to it
+	selectTreeNode({ id: matchId });
 
 	// Update the search results count
 	updateSearchResultsCount();
@@ -69,7 +60,6 @@ const highlightNextMatch = () => {
 // Initialize search functionality
 document.addEventListener('DOMContentLoaded', () => {
 	const searchInput = document.getElementById('search-input');
-	const selectComponentBtn = document.getElementById('select-component-btn');
 
 	// Search on input change
 	searchInput.addEventListener('input', () => {
@@ -87,10 +77,5 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (searchMatches.length > 0)
 				highlightNextMatch();
 		}
-	});
-
-	// Toggle select component button
-	selectComponentBtn.addEventListener('click', () => {
-		toggleSelectButton(!selectComponentBtn.classList.contains('active'));
 	});
 });

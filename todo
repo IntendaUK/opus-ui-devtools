@@ -13,3 +13,4 @@
 * See diagnostic results in devtools
 * Click to copy component path
 * Input states have refs in them so they give cyclic errors
+* Clicking on flows source/target with a scoped id doesn't work

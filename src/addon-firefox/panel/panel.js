@@ -43,12 +43,22 @@ chrome.runtime.onMessage.addListener(message => {
 
 		displayStateInSidebar(state, id, domNode);
 	} else if (message.action === 'OPUS_GET_SELECT_COMPONENT') {
-		selectTreeNode(message.data.id);
+		selectTreeNode({ id: message.data.id });
 
 		toggleSelectButton(false);
 	} else if (message.action === 'OPUS_GET_COMPONENT_TREE')
 		displayData(message.data);
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+	const selectComponentBtn = document.getElementById('select-component-btn');
+
+	// Toggle select component button
+	selectComponentBtn.addEventListener('click', () => {
+		toggleSelectButton(!selectComponentBtn.classList.contains('active'));
+	});
+});
+
 
 chrome.runtime.sendMessage({ action: 'OPUS_ASK_COMPONENT_TREE' });
 

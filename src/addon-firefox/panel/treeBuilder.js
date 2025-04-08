@@ -38,7 +38,7 @@ const highlightSelectedComponent = selectedId => {
 	});
 };
 
-export const selectTreeNode = id => {
+export const selectTreeNode = ({ id, doScroll = true }) => {
 	// Highlight this component
 	highlightSelectedComponent(id);
 
@@ -47,6 +47,17 @@ export const selectTreeNode = id => {
 		action: 'OPUS_ASK_STATE_DATA',
 		data: { id }
 	});
+
+	// Scroll the node into view if doScroll is true
+	if (doScroll) {
+		const element = document.querySelector(`.devtools-line[data-component-id="${id}"]`);
+		if (element) {
+			element.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center'
+			});
+		}
+	}
 };
 
 // Create HTML representation of the tree
@@ -97,7 +108,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 			dataset: { componentId: node.id },
 			events: {
 				click: () => {
-					selectTreeNode(node.id);
+					selectTreeNode({ id: node.id, doScroll: false });
 				},
 				mouseenter: () => {
 					chrome.runtime.sendMessage({
