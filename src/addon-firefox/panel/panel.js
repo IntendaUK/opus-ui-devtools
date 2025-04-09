@@ -1,5 +1,5 @@
 import { buildTreeMap, createHtmlFromTree, selectTreeNode } from './treeBuilder.js';
-import { displayStateInSidebar } from './stateDisplay.js';
+import { displayStateInSidebar } from './stateDisplay/index.js';
 import './search.js';
 
 let domData;
