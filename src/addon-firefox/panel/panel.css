@@ -596,3 +596,51 @@ body {
 	top: 0px;
 	height: 100%;
 }
+
+/* Scripts section styles */
+.scripts-container {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.script-box {
+	background-color: var(--hover-bg);
+	border-radius: 8px;
+	padding: 6px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	display: flex;
+	gap: 6px;
+	flex-direction: column;
+	align-items: center;
+	border: 1px solid var(--border-color);
+}
+
+.triggers-container {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+}
+
+.trigger-line {
+	padding: 4px 0;
+	font-family: var(--font-mono);
+}
+
+.arrow-down {
+	font-size: 20px;
+	color: var(--accent-color);
+}
+
+.actions-count {
+	font-weight: bold;
+}
+
+.no-scripts {
+	font-style: italic;
+	color: var(--timestamp-color);
+	padding: 8px;
+}

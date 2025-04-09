@@ -2,11 +2,9 @@
 * Base property data type on propSpec, not on value
 * Tree stays the same if you open devtools for a different website while you already have another one open
 * Script (and firescript) trigger/actions viewer
-* Properties with options in their spec should have dropdowns for their values
 * Weird parent issue on opus ui website where the cpn doesn't exist (for the code sections somewhere)
 * Add diagnostics to scripts from devtools
 * See diagnostic results in devtools
 * Click to copy component path
 * Clicking on flows source/target with a scoped id doesn't work
 * Hovering on elements that don't exist in the dom should not give an error (perhaps show the parent instead...would help for dataloaders)
-* Filter DOM on component types (modify tree)

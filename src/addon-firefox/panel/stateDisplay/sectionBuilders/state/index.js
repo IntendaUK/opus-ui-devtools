@@ -143,11 +143,16 @@ sectionOrder.forEach(category => {
 	});
 	
 	// Create content container that can be collapsed
+	// Start with collapsed state for all sections except 'custom' and 'own'
+	const shouldBeCollapsed = category !== 'custom' && category !== 'own';
 	const contentContainer = createElement({
 		type: 'div',
-		className: 'category-content',
+		className: `category-content${shouldBeCollapsed ? ' collapsed' : ''}`,
 		parent: categorySection
 	});
+	
+	// Set initial collapse icon based on collapsed state
+	collapseIcon.textContent = shouldBeCollapsed ? '▶' : '▼';
 	
 	// Add click event to header for collapsing/expanding
 	headerElement.addEventListener('click', (e) => {

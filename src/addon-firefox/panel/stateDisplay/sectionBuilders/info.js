@@ -1,5 +1,11 @@
 import { createElement } from '../../domHelper.js';
 
+const getShortId = id => {
+	const displayId = id.length > 9 ? `${id.substring(0, 8)}&hellip;` : id;
+
+	return displayId;
+};
+
 const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	const metadataSection = createElement({
 		type: 'div',
@@ -18,7 +24,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	createElement({
 		type: 'div',
 		className: 'state-property',
-		innerHTML: `<span class="property-key">id:</span> ${componentId}`,
+		innerHTML: `<span class="property-key">id:</span> ${getShortId(componentId)}`,
 		parent: metadataSection
 	});
 
@@ -26,7 +32,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	createElement({
 		type: 'div',
 		className: 'state-property',
-		innerHTML: `<span class="property-key">parent id:</span> ${state.parentId}`,
+		innerHTML: `<span class="property-key">parent id:</span> ${getShortId(state.parentId)}`,
 		parent: metadataSection
 	});
 
