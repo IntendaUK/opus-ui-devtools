@@ -57,6 +57,44 @@ document.addEventListener('DOMContentLoaded', () => {
 	selectComponentBtn.addEventListener('click', () => {
 		toggleSelectButton(!selectComponentBtn.classList.contains('active'));
 	});
+
+	// Sidebar resize functionality
+	const resizeHandle = document.getElementById('resize-handle');
+	const sidebar = document.getElementById('state-sidebar');
+	let isResizing = false;
+	let lastX = 0;
+
+	// Function to handle mouse down on resize handle
+	const handleMouseDown = (e) => {
+		isResizing = true;
+		lastX = e.clientX;
+		document.body.style.cursor = 'col-resize';
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+		e.preventDefault();
+	};
+
+	// Function to handle mouse move during resize
+	const handleMouseMove = (e) => {
+		if (!isResizing) return;
+		
+		const deltaX = e.clientX - lastX;
+		const newWidth = Math.max(150, Math.min(600, sidebar.offsetWidth - deltaX));
+		
+		sidebar.style.width = `${newWidth}px`;
+		lastX = e.clientX;
+	};
+
+	// Function to handle mouse up after resize
+	const handleMouseUp = () => {
+		isResizing = false;
+		document.body.style.cursor = '';
+		document.removeEventListener('mousemove', handleMouseMove);
+		document.removeEventListener('mouseup', handleMouseUp);
+	};
+
+	// Add event listener to resize handle
+	resizeHandle.addEventListener('mousedown', handleMouseDown);
 });
 
 
