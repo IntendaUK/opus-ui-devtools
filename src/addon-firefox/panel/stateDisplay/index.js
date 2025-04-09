@@ -1,7 +1,7 @@
 import buildSectionInfo from './sectionBuilders/info.js';
 import buildSectionFlows from './sectionBuilders/flows.js';
 import buildSectionScripts from './sectionBuilders/scripts.js';
-import buildSectionState from './sectionBuilders/state.js';
+import buildSectionState from './sectionBuilders/state/index.js';
 
 // Display component state in the sidebar
 const displayStateInSidebar = (data, componentId, domNode) => {
