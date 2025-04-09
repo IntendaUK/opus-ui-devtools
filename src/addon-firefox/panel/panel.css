@@ -199,7 +199,7 @@ body {
 	color: var(--state-number);
 }
 
-.state-number-input, .state-string-input {
+.state-number-input, .state-string-input, .state-dropdown-input {
 	background-color: transparent;
 	color: var(--text-color);
 	border: none;
@@ -210,11 +210,99 @@ body {
 	outline: none;
 }
 
+.state-dropdown-input {
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml;utf8,<svg fill='%23cfd8dc' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+	background-repeat: no-repeat;
+	background-position: right center;
+	padding-right: 20px;
+}
+
+.state-dropdown-input option {
+	background-color: var(--hover-bg);
+	color: var(--text-color);
+}
+
+/* Custom dropdown styles */
+.custom-dropdown {
+	position: absolute;
+	background-color: var(--hover-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	z-index: 1000;
+	max-height: 200px;
+	overflow-y: auto;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	width: 150px;
+}
+
+.custom-dropdown-container {
+}
+
+.custom-dropdown-trigger {
+	cursor: pointer;
+	padding: 2px 4px;
+	background-color: var(--hover-bg);
+	border-radius: 3px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	min-width: 100px;
+	position: relative;
+}
+
+.dropdown-value {
+	color: var(--accent-color);
+}
+
+.dropdown-icon {
+	margin-left: 4px;
+	font-size: 10px;
+	color: var(--text-color);
+	pointer-events: none;
+}
+
+.dropdown-option {
+	padding: 6px 8px;
+	cursor: pointer;
+}
+
+.dropdown-option.selected {
+	color: var(--accent-color);
+	background-color: var(--select-bg);
+}
+
+/* Object tree styles */
+.object-tree-container {
+	/* Container for object trees */
+}
+
+.toggle-icon {
+	cursor: pointer;
+	margin-right: 4px;
+	user-select: none;
+	display: inline-block;
+	width: 12px;
+	text-align: center;
+	color: var(--text-color);
+	transition: transform 0.2s;
+}
+
+.object-type {
+	color: var(--accent-color);
+	cursor: pointer;
+}
+
+.object-children {
+	margin-left: 16px;
+}
+
 .state-number-input {
 	color: var(--state-number);
 }
 
-.state-number-input:focus, .state-string-input:focus {
+.state-number-input:focus, .state-string-input:focus, .state-dropdown-input:focus {
 	border-color: var(--accent-color);
 }
 

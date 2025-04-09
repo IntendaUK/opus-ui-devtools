@@ -1,4 +1,24 @@
 import { createElement } from '../../domHelper.js';
+import { getKey as getGlobalConfigKey } from '../../globalConfig.js';
+
+// Global variable to track the currently open dropdown
+let activeDropdown = null;
+
+// Function to close any open dropdown
+const closeActiveDropdown = () => {
+	if (activeDropdown) {
+		activeDropdown.remove();
+		activeDropdown = null;
+	}
+};
+
+// Add a global click event listener to close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+	// If we clicked on a dropdown or its trigger, the dropdown's own click handlers will manage it
+	if (!e.target.closest('.custom-dropdown') && !e.target.closest('.custom-dropdown-trigger')) {
+		closeActiveDropdown();
+	}
+});
 
 const ignoreKeys = ['id', 'type', 'flows', 'scps', 'path', 'updates', 'parentId', 'indexInParent', 'tags'];
 
@@ -16,14 +36,6 @@ const createObjectTree = (obj, parent, initiallyExpanded = true) => {
 		className: `toggle-icon ${initiallyExpanded ? '' : 'collapsed'}`,
 		textContent: '▼',
 		style: {
-			cursor: 'pointer',
-			marginRight: '4px',
-			userSelect: 'none',
-			display: 'inline-block',
-			width: '12px',
-			textAlign: 'center',
-			color: 'var(--fg-color)',
-			transition: 'transform 0.2s',
 			transform: initiallyExpanded ? 'rotate(0deg)' : 'rotate(-90deg)'
 		},
 		events: {
@@ -42,10 +54,6 @@ const createObjectTree = (obj, parent, initiallyExpanded = true) => {
 		type: 'span',
 		className: 'object-type',
 		textContent: Array.isArray(obj) ? '[ ]' : '{ }',
-		style: {
-			color: 'var(--accent-color)',
-			cursor: 'pointer'
-		},
 		events: {
 			click: () => {
 				// Trigger the same toggle action as the icon
@@ -60,7 +68,6 @@ const createObjectTree = (obj, parent, initiallyExpanded = true) => {
 		type: 'div',
 		className: 'object-children',
 		style: {
-			marginLeft: '16px',
 			display: initiallyExpanded ? 'block' : 'none'
 		},
 		parent: container
@@ -140,9 +147,6 @@ const renderValue = (value, parent) => {
 			type: 'span',
 			className: 'state-boolean',
 			textContent: value.toString(),
-			style: {
-				color: 'var(--accent-color)'
-			},
 			parent
 		});
 	} else if (typeof value === 'number') {
@@ -150,9 +154,6 @@ const renderValue = (value, parent) => {
 			type: 'span',
 			className: 'state-number',
 			textContent: value.toString(),
-			style: {
-				color: 'var(--accent-color)'
-			},
 			parent
 		});
 	} else if (typeof value === 'string') {
@@ -160,9 +161,6 @@ const renderValue = (value, parent) => {
 			type: 'span',
 			className: 'state-string',
 			textContent: `"${value}"`,
-			style: {
-				color: 'var(--accent-color)'
-			},
 			parent
 		});
 	} else if (typeof value === 'object') {
@@ -198,9 +196,21 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 
 	stateKeys.sort((a, b) => a.localeCompare(b));
 
-	stateKeys.forEach(key => {
-		const value = state[key];
+	const propSpec = getGlobalConfigKey('propSpecs')[state.type];
 
+	const entries = stateKeys.map(key => {
+		const res = {
+			key,
+			value: state[key]
+		};
+
+		if (propSpec[key]?.options)
+			res.options = propSpec[key].options;
+
+		return res;
+	});
+
+	entries.forEach(({ key, value, options }) => {
 		const propertyContainer = createElement({
 			type: 'div',
 			className: 'state-property',
@@ -267,28 +277,126 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 				}
 			});
 		} else if (typeof value === 'string') {
-			// Create a text input for string values
-			const textInput = createElement({
-				type: 'input',
-				attributes: {
-					type: 'text',
-					value
-				},
-				className: 'state-string-input',
-				parent: propertyContainer,
-				events: {
-					input: e => {
-						chrome.runtime.sendMessage({
-							action: 'OPUS_ASK_SET_COMPONENT_STATE',
-							data: {
-								target: componentId,
-								key,
-								value: e.target.value
-							}
-						});
+			if (options && Array.isArray(options)) {
+				// Create a container for the dropdown
+				const dropdownContainer = createElement({
+					type: 'div',
+					className: 'custom-dropdown-container',
+					parent: propertyContainer
+				});
+				
+				// Create the value display element
+				const valueDisplay = createElement({
+					type: 'span',
+					className: 'dropdown-value',
+					textContent: value,
+					parent: dropdownContainer
+				});
+				
+				// Create a custom dropdown trigger
+				const dropdownTrigger = createElement({
+					type: 'div',
+					className: 'custom-dropdown-trigger',
+					parent: dropdownContainer,
+					events: {
+						click: (e) => {
+							e.stopPropagation(); // Prevent the document click handler from firing
+							
+							// Close any existing dropdown
+							closeActiveDropdown();
+							
+							// Create and position the dropdown
+							const dropdown = createElement({
+								type: 'div',
+								className: 'custom-dropdown',
+								parent: document.body // Append to body to avoid containment issues
+							});
+							
+							// Calculate position
+							const rect = dropdownTrigger.getBoundingClientRect();
+							dropdown.style.top = `${rect.bottom}px`;
+							dropdown.style.left = `${rect.left}px`;
+							
+							// Add options to the dropdown
+							options.forEach(optionValue => {
+								const option = createElement({
+									type: 'div',
+									className: `dropdown-option ${optionValue === value ? 'selected' : ''}`,
+									textContent: optionValue,
+									events: {
+										click: (e) => {
+											e.stopPropagation();
+											
+											// Update the value display text
+											valueDisplay.textContent = optionValue;
+											
+											// Send the update message
+											chrome.runtime.sendMessage({
+												action: 'OPUS_ASK_SET_COMPONENT_STATE',
+												data: {
+													target: componentId,
+													key,
+													value: optionValue
+												}
+											});
+											
+											// Close the dropdown
+											closeActiveDropdown();
+										},
+										mouseover: (e) => {
+											e.target.style.backgroundColor = 'var(--select-bg)';
+										},
+										mouseout: (e) => {
+											if (optionValue !== value) {
+												e.target.style.backgroundColor = 'transparent';
+											}
+										}
+									},
+									parent: dropdown
+								});
+							});
+							
+							// Store the active dropdown
+							activeDropdown = dropdown;
+						}
 					}
-				}
-			});
+				});
+				
+				// Add the value display to the trigger
+				valueDisplay.remove(); // Remove from container
+				dropdownTrigger.appendChild(valueDisplay); // Add to trigger
+				
+				// Add a dropdown indicator
+				createElement({
+					type: 'span',
+					className: 'dropdown-icon',
+					textContent: '▼',
+					parent: dropdownTrigger
+				});
+			} else {
+				// Create a text input for string values without options
+				const textInput = createElement({
+					type: 'input',
+					attributes: {
+						type: 'text',
+						value
+					},
+					className: 'state-string-input',
+					parent: propertyContainer,
+					events: {
+						input: e => {
+							chrome.runtime.sendMessage({
+								action: 'OPUS_ASK_SET_COMPONENT_STATE',
+								data: {
+									target: componentId,
+									key,
+									value: e.target.value
+								}
+							});
+						}
+					}
+				});
+			}
 		} else if (value === null) {
 			createElement({
 				type: 'span',

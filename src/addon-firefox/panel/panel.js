@@ -1,5 +1,6 @@
 import { buildTreeMap, createHtmlFromTree, selectTreeNode } from './treeBuilder.js';
 import { displayStateInSidebar } from './stateDisplay/index.js';
+import { set as setGlobalConfig } from './globalConfig.js';
 import './search.js';
 
 let domData;
@@ -48,6 +49,8 @@ chrome.runtime.onMessage.addListener(message => {
 		toggleSelectButton(false);
 	} else if (message.action === 'OPUS_GET_COMPONENT_TREE')
 		displayData(message.data);
+	else if (message.action === 'OPUS_GET_OPUS_CONFIG')
+		setGlobalConfig(message.data.opusConfig);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -98,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+chrome.runtime.sendMessage({ action: 'OPUS_ASK_OPUS_CONFIG' });
 chrome.runtime.sendMessage({ action: 'OPUS_ASK_COMPONENT_TREE' });
 
 export {
