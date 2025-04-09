@@ -85,6 +85,92 @@ body {
 	border-color: var(--accent-color);
 }
 
+/* Filter dropdown styles */
+#filter-dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background-color: var(--hover-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	z-index: 1000;
+	width: 250px;
+	max-height: 300px;
+	overflow-y: auto;
+	margin-top: 4px;
+	display: none;
+}
+
+#filter-dropdown.visible {
+	display: block;
+}
+
+.filter-dropdown-header {
+	padding: 8px 12px;
+	font-weight: bold;
+	border-bottom: 1px solid var(--border-color);
+	background-color: var(--hover-bg);
+	color: var(--accent-color);
+}
+
+.filter-dropdown-content {
+	padding: 8px;
+}
+
+.filter-item {
+	display: flex;
+	align-items: center;
+	padding: 6px 8px;
+	cursor: pointer;
+	border-radius: 3px;
+}
+
+.filter-item:hover {
+	background-color: var(--select-bg);
+}
+
+.filter-checkbox {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 16px;
+	height: 16px;
+	border: 1px solid var(--border-color);
+	border-radius: 3px;
+	background-color: var(--hover-bg);
+	position: relative;
+	cursor: pointer;
+	vertical-align: middle;
+	margin-right: 8px;
+}
+
+.filter-checkbox:checked {
+	background-color: var(--accent-color);
+	border-color: var(--accent-color);
+}
+
+.filter-checkbox:checked::after {
+	content: '';
+	position: absolute;
+	left: 5px;
+	top: 2px;
+	width: 4px;
+	height: 8px;
+	border: solid var(--bg-color);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+}
+
+.filter-label {
+	flex: 1;
+	user-select: none;
+}
+
+/* Faded node style for filtered components */
+.node-container.filtered-out {
+	opacity: 0.5;
+}
+
 #search-input {
 	flex: 1;
 	padding: 6px 10px;

@@ -1,5 +1,4 @@
 * See current flow value
-* Group properties by type (custom vs css, etc.)
 * Base property data type on propSpec, not on value
 * Tree stays the same if you open devtools for a different website while you already have another one open
 * Script (and firescript) trigger/actions viewer

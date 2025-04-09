@@ -76,8 +76,24 @@ const toggleNodeChildren = (nodeId) => {
 	}
 };
 
+// Function to check if a node or any of its children match the filter
+const nodeMatchesFilter = (node, childrenMap, filters) => {
+	// If no filters are provided or filters is empty, everything matches
+	if (!filters || filters.size === 0) return true;
+	
+	// Check if this node's type passes the filter
+	const typeMatches = filters.get(node.type) !== false;
+	
+	// If this node matches, return true immediately
+	if (typeMatches) return true;
+	
+	// If this node doesn't match, check its children recursively
+	const children = childrenMap.get(node.id) || [];
+	return children.some(child => nodeMatchesFilter(child, childrenMap, filters));
+};
+
 // Create HTML representation of the tree
-const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) => {
+const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, parentScopes = [], filters = null) => {
 	const nodes = childrenMap.get(parentId) || [];
 	const container = createElement({
 		type: 'div',
@@ -85,10 +101,17 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 	});
 
 	nodes.forEach(node => {
+		// Check if this node or any of its children match the filter
+		const nodeMatches = !filters || nodeMatchesFilter(node, childrenMap, filters);
+		const typeMatches = !filters || filters.get(node.type) !== false;
+		
+		// Skip this node entirely if it doesn't match and none of its children match
+		if (!nodeMatches) return;
+		
 		// Create a node container to hold the line and its scope indicators
 		const nodeContainer = createElement({
 			type: 'div',
-			className: 'node-container',
+			className: `node-container${(!typeMatches && nodeMatches) ? ' filtered-out' : ''}`,
 			style: { position: 'relative' },
 			parent: container
 		});
@@ -252,7 +275,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 		}
 
 		// Recursively create child container with current node's scopes
-		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1, scopeDepth + (nodeScopes.length ?? 0), nodeScopes);
+		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1, scopeDepth + (nodeScopes.length ?? 0), nodeScopes, filters);
 		childContainer.style.position = 'relative'; // For proper positioning of child scope lines
 		
 		// Create a wrapper for the child container with data attribute for parent ID
