@@ -97,7 +97,7 @@ const sectionTitles = {
 };
 
 // Define the order of sections to ensure properties are rendered in the correct order
-const sectionOrder = ['cssAttributes', 'cssVariables', 'cssClasses', 'internal', 'own', 'custom', 'other'];
+const sectionOrder = ['custom', 'own', 'cssAttributes', 'cssVariables', 'cssClasses', 'internal', 'other'];
 
 // Create sections for each category in the defined order
 sectionOrder.forEach(category => {

@@ -161,6 +161,7 @@ body {
 	color: var(--scope-color-1);
 	margin-right: 8px;
 	max-width: calc(100% - 100px - 8px);
+	min-width: 100px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -285,7 +286,7 @@ body {
 
 /* Object tree styles */
 .object-tree-container {
-	/* Container for object trees */
+	flex: 1;
 }
 
 .toggle-icon {
@@ -383,6 +384,7 @@ body {
 	text-align: center;
 	font-size: 10px;
 	transition: transform 0.2s;
+	margin-right: 6px;
 }
 
 .category-content {

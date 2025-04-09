@@ -52,7 +52,7 @@ const renderValue = (value, parent) => {
 };
 
 // Create a tree view for object values
-const createObjectTree = (obj, parent, initiallyExpanded = true) => {
+const createObjectTree = (obj, parent, initiallyExpanded = false) => {
 	const container = createElement({
 		type: 'div',
 		className: 'object-tree-container',
