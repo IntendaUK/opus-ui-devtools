@@ -33,6 +33,15 @@ script.textContent = `
 						state
 					}
 				}, '*');
+			} else if (event.data.type === 'OPUS_ASK_OPUS_CONFIG') {
+				const opusConfig = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getGlobalConfig();
+
+				window.postMessage({
+					type: 'OPUS_GET_OPUS_CONFIG',
+					data: {
+						opusConfig
+					}
+				}, '*');
 			} else if (event.data.type === 'OPUS_ASK_SHOW_OVERLAY')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
 			else if (event.data.type === 'OPUS_ASK_HIDE_OVERLAY')
@@ -61,11 +70,11 @@ script.textContent = `
 				const checkIfOpusExists = () => {
 					attemptsLeft--;
 
-					if (!!window.opus) {
+					if (!!window.opus || !!document.querySelector('#POPOVERS.cpnContainerSimple')) {
 						window.postMessage({
 							type: 'OPUS_GET_IS_OPUS_APP',
 							data: {
-								result: !!window.opus
+								result: true
 							}
 						});
 					} else if (attemptsLeft > 0)

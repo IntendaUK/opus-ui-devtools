@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Opus DevTools",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"permissions": [
 		"activeTab",
 		"<all_urls>"

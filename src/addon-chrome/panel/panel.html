@@ -12,12 +12,18 @@
 							<path d="M3 3l7 7m0 0l-7 7m7-7h18"></path>
 						</svg>
 					</button>
-					<input type="text" id="search-input" placeholder="Search by id/type..." />
+					<input type="text" id="search-input" placeholder="Search by (id / type / scope / relId)..." />
 					<div id="search-results-count"></div>
+					<button id="filter-btn" class="icon-button" title="Filter components">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+						</svg>
+					</button>
 				</div>
 			</div>
 			<div class="content-container">
 				<div id="data-container">Waiting for data...</div>
+				<div id="resize-handle"></div>
 				<div id="state-sidebar">
 					<div id="state-content">Select a component to view its state</div>
 				</div>

@@ -38,7 +38,7 @@ const highlightSelectedComponent = selectedId => {
 	});
 };
 
-export const selectTreeNode = id => {
+export const selectTreeNode = ({ id, doScroll = true }) => {
 	// Highlight this component
 	highlightSelectedComponent(id);
 
@@ -47,10 +47,53 @@ export const selectTreeNode = id => {
 		action: 'OPUS_ASK_STATE_DATA',
 		data: { id }
 	});
+
+	// Scroll the node into view if doScroll is true
+	if (doScroll) {
+		const element = document.querySelector(`.devtools-line[data-component-id="${id}"]`);
+		if (element) {
+			element.scrollIntoView({
+				behavior: 'smooth',
+				block: 'center'
+			});
+		}
+	}
+};
+
+// Toggle the visibility of a node's children
+const toggleNodeChildren = (nodeId) => {
+	const childContainer = document.querySelector(`.child-container[data-parent-id="${nodeId}"]`);
+	if (!childContainer) return;
+
+	const isExpanded = childContainer.style.display !== 'none';
+	childContainer.style.display = isExpanded ? 'none' : 'block';
+
+	// Update the toggle icon
+	const toggleIcon = document.querySelector(`.toggle-icon[data-node-id="${nodeId}"]`);
+	if (toggleIcon) {
+		toggleIcon.classList.toggle('collapsed', isExpanded);
+		toggleIcon.title = isExpanded ? 'Expand' : 'Collapse';
+	}
+};
+
+// Function to check if a node or any of its children match the filter
+const nodeMatchesFilter = (node, childrenMap, filters) => {
+	// If no filters are provided or filters is empty, everything matches
+	if (!filters || filters.size === 0) return true;
+	
+	// Check if this node's type passes the filter
+	const typeMatches = filters.get(node.type) !== false;
+	
+	// If this node matches, return true immediately
+	if (typeMatches) return true;
+	
+	// If this node doesn't match, check its children recursively
+	const children = childrenMap.get(node.id) || [];
+	return children.some(child => nodeMatchesFilter(child, childrenMap, filters));
 };
 
 // Create HTML representation of the tree
-const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) => {
+const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, parentScopes = [], filters = null) => {
 	const nodes = childrenMap.get(parentId) || [];
 	const container = createElement({
 		type: 'div',
@@ -58,13 +101,23 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 	});
 
 	nodes.forEach(node => {
+		// Check if this node or any of its children match the filter
+		const nodeMatches = !filters || nodeMatchesFilter(node, childrenMap, filters);
+		const typeMatches = !filters || filters.get(node.type) !== false;
+		
+		// Skip this node entirely if it doesn't match and none of its children match
+		if (!nodeMatches) return;
+		
 		// Create a node container to hold the line and its scope indicators
 		const nodeContainer = createElement({
 			type: 'div',
-			className: 'node-container',
+			className: `node-container${(!typeMatches && nodeMatches) ? ' filtered-out' : ''}`,
 			style: { position: 'relative' },
 			parent: container
 		});
+
+		// Check if this node has children
+		const hasChildren = childrenMap.has(node.id) && childrenMap.get(node.id).length > 0;
 
 		//Convert "componentType" to "Component Type"
 		const componentType = node.type[0].toUpperCase() + node.type.substr(1);
@@ -89,15 +142,63 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 			displayText += ` <span>relId=<span style="color:var(--accent-color)">${node.relId}</span></span>`;
 
 		// Create the line element for the node content
+		const lineContainer = createElement({
+			type: 'div',
+			className: 'line-container',
+			style: { 
+				display: 'flex',
+				alignItems: 'center'
+			},
+			parent: nodeContainer
+		});
+
+		// Add toggle icon for nodes with children
+		if (hasChildren) {
+			const toggleIcon = createElement({
+				type: 'div',
+				className: 'toggle-icon',
+				textContent: '▼', // Default to expanded
+				style: {
+					marginLeft: `${(12 + (depth * 16))}px`,
+					marginRight: '4px',
+					cursor: 'pointer',
+					userSelect: 'none',
+					width: '12px',
+					textAlign: 'center',
+					color: 'var(--fg-color)'
+				},
+				dataset: { nodeId: node.id },
+				attributes: { title: 'Collapse' },
+				events: {
+					click: (e) => {
+						e.stopPropagation(); // Prevent triggering the line click event
+						toggleNodeChildren(node.id);
+					}
+				},
+				parent: lineContainer
+			});
+		} else {
+			// Add a spacer for nodes without children to maintain alignment
+			createElement({
+				type: 'div',
+				style: {
+					marginLeft: `${(12 + (depth * 16))}px`,
+					width: '16px'
+				},
+				parent: lineContainer
+			});
+		}
+
+		// Create the line element for the node content
 		const line = createElement({
 			type: 'div',
 			className: 'devtools-line',
-			style: { marginLeft: `${depth * 16}px` },
+			style: { flex: 1 },
 			innerHTML: displayText,
 			dataset: { componentId: node.id },
 			events: {
 				click: () => {
-					selectTreeNode(node.id);
+					selectTreeNode({ id: node.id, doScroll: false });
 				},
 				mouseenter: () => {
 					chrome.runtime.sendMessage({
@@ -109,7 +210,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_OVERLAY' });
 				}
 			},
-			parent: nodeContainer
+			parent: lineContainer
 		});
 
 		// Add indicators for hasScripts and hasFlows
@@ -174,19 +275,20 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 		}
 
 		// Recursively create child container with current node's scopes
-		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1, scopeDepth + (nodeScopes.length ?? 0), nodeScopes);
+		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1, scopeDepth + (nodeScopes.length ?? 0), nodeScopes, filters);
 		childContainer.style.position = 'relative'; // For proper positioning of child scope lines
+		
+		// Create a wrapper for the child container with data attribute for parent ID
+		const childWrapper = createElement({
+			type: 'div',
+			className: 'child-container',
+			style: { position: 'relative', display: 'block' }, // Default to expanded
+			dataset: { parentId: node.id },
+			parent: container
+		});
 
 		// Add vertical scope lines that extend from parent to children
 		if (nodeScopes.length > 0) {
-			// Create a wrapper for the child container to position the scope lines
-			const childWrapper = createElement({
-				type: 'div',
-				className: 'child-wrapper',
-				style: { position: 'relative' },
-				parent: container
-			});
-
 			// Add scope indicators for each scope that extend to children
 			nodeScopes.forEach((scope, index) => {
 				const scopeColor = getScopeColorByDepth(scopeDepth, index);
@@ -202,10 +304,10 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0) =>
 					parent: childWrapper
 				});
 			});
-
-			childWrapper.appendChild(childContainer);
-		} else
-			container.appendChild(childContainer);
+		}
+		
+		// Add the child container to the wrapper
+		childWrapper.appendChild(childContainer);
 	});
 
 	return container;

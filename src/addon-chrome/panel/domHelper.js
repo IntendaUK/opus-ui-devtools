@@ -12,7 +12,7 @@
  * @param {HTMLElement} [options.parent] - Parent element to append to
  * @returns {HTMLElement} The created element
  */
-const createElement = (options) => {
+const createElement = options => {
 	const {
 		type,
 		className,
@@ -30,19 +30,17 @@ const createElement = (options) => {
 
 	// Set class name(s)
 	if (className) {
-		if (Array.isArray(className)) {
+		if (Array.isArray(className))
 			element.className = className.join(' ');
-		} else {
+		 else
 			element.className = className;
-		}
 	}
 
 	// Set content (innerHTML takes precedence over textContent)
-	if (innerHTML !== undefined) {
+	if (innerHTML !== undefined)
 		element.innerHTML = innerHTML;
-	} else if (textContent !== undefined) {
+	 else if (textContent !== undefined)
 		element.textContent = textContent;
-	}
 
 	// Set style properties
 	if (style) {
@@ -73,13 +71,10 @@ const createElement = (options) => {
 	}
 
 	// Append to parent if provided
-	if (parent) {
+	if (parent)
 		parent.appendChild(element);
-	}
 
 	return element;
 };
 
-export {
-	createElement
-};
+export { createElement };
