@@ -1,8 +1,11 @@
 let panelCreated = false;
 
 chrome.runtime.onMessage.addListener(message => {
-	if (message.action === 'OPUS_GET_ADDON_IS_READY')
+	if (message.action === 'OPUS_GET_ADDON_IS_READY') {
 		chrome.runtime.sendMessage({ action: 'OPUS_ASK_IS_OPUS_APP' });
+
+		return true;
+	}
 	else if (
 		message.action === 'OPUS_GET_IS_OPUS_APP' &&
 		message.data.result === true &&

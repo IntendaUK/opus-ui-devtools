@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener(message => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action.indexOf('OPUS_ASK') === 0) {
 		chrome.tabs.query({
 			active: true,
@@ -8,11 +8,24 @@ chrome.runtime.onMessage.addListener(message => {
 				action: message.action,
 				data: message.data
 			});
+
+			return true;
 		});
-	} else if (message.action.indexOf('OPUS_GET') === 0) {
-		chrome.runtime.sendMessage({
+	}
+
+	return false;
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (message.action.indexOf('OPUS_GET') === 0) {
+		sendResponse({
 			action: message.action,
 			data: message.data
 		});
+
+		return true;
 	}
+
+	return false;
 });
+
