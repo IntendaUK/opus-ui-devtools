@@ -1,6 +1,8 @@
 import { createElement } from '../../domHelper.js';
 import { selectTreeNode } from '../../treeBuilder.js';
 
+const tabId = chrome.devtools.inspectedWindow.tabId;
+
 const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 	const flowsSection = createElement({
 		type: 'div',
@@ -24,11 +26,15 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 				mouseenter: () => {
 					chrome.runtime.sendMessage({
 						action: 'OPUS_ASK_SHOW_FLOW',
+						tabId,
 						data: flow
 					});
 				},
 				mouseleave: () => {
-					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW',
+						tabId
+					});
 				}
 			}
 		});
@@ -43,7 +49,10 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 				click: () => {
 					selectTreeNode(flow.from);
 
-					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW',
+						tabId
+					});
 				}
 			}
 		});
@@ -66,7 +75,10 @@ const buildSectionFlows = (stateContent, componentId, domNode, state) => {
 				click: () => {
 					selectTreeNode(flow.to);
 
-					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_FLOW' });
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_FLOW',
+						tabId
+					});
 				}
 			}
 		});

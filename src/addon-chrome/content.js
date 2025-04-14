@@ -1,8 +1,8 @@
 // Create a script element to load the inject.js file
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('inject.js');
-script.onload = function() {
-    this.remove(); // Remove the script element after it loads
+script.onload = function () {
+	this.remove();
 };
 (document.head || document.documentElement).appendChild(script);
 
@@ -27,7 +27,6 @@ window.addEventListener('message', event => {
 		return true;
 	}
 });
-
 // Devtools (BG) -> Browser Tab (The script at the top of this file)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action.indexOf('OPUS_ASK') !== 0)

@@ -2,6 +2,8 @@ import { createElement } from '../../../domHelper.js';
 import { getKey as getGlobalConfigKey } from '../../../globalConfig.js';
 import createObjectTree from './createObjectTree.js';
 
+const tabId = chrome.devtools.inspectedWindow.tabId;
+
 // Global variable to track the currently open dropdown
 let activeDropdown = null;
 
@@ -14,11 +16,10 @@ const closeActiveDropdown = () => {
 };
 
 // Add a global click event listener to close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
+document.addEventListener('click', e => {
 	// If we clicked on a dropdown or its trigger, the dropdown's own click handlers will manage it
-	if (!e.target.closest('.custom-dropdown') && !e.target.closest('.custom-dropdown-trigger')) {
+	if (!e.target.closest('.custom-dropdown') && !e.target.closest('.custom-dropdown-trigger'))
 		closeActiveDropdown();
-	}
 });
 
 const ignoreKeys = ['id', 'type', 'flows', 'scps', 'path', 'updates', 'parentId', 'indexInParent', 'tags'];
@@ -45,130 +46,131 @@ const buildSectionState = (stateContent, componentId, domNode, state) => {
 	const basePropSpec = getGlobalConfigKey('propSpecs').baseProps;
 	const propSpec = getGlobalConfigKey('propSpecs')[state.type];
 
-// Categorize entries into sections
-const categorizeEntry = (key) => {
-	if (!propSpec || propSpec[key] === undefined) return 'custom';
-	if (propSpec[key].cssAttr !== undefined) return 'cssAttributes';
-	if (propSpec[key].cssVar !== undefined) return 'cssVariables';
-	if (propSpec[key].internal === true) return 'internal';
-	if (propSpec[key].classMap !== undefined) return 'cssClasses';
-	// Check if it's in propSpec but not in baseProps
-	if (propSpec[key] !== undefined && (!basePropSpec || basePropSpec[key] === undefined)) return 'own';
-	return 'other';
-};
+	// Categorize entries into sections
+	const categorizeEntry = key => {
+		if (!propSpec || propSpec[key] === undefined) return 'custom';
+		if (propSpec[key].cssAttr !== undefined) return 'cssAttributes';
+		if (propSpec[key].cssVar !== undefined) return 'cssVariables';
+		if (propSpec[key].internal === true) return 'internal';
+		if (propSpec[key].classMap !== undefined) return 'cssClasses';
+		// Check if it's in propSpec but not in baseProps
+		if (propSpec[key] !== undefined && (!basePropSpec || basePropSpec[key] === undefined)) return 'own';
 
-// Create entries with category information
-const entries = stateKeys.map(key => {
-	const res = {
-		key,
-		value: state[key],
-		category: categorizeEntry(key)
+		return 'other';
 	};
 
-	if (propSpec && propSpec[key]?.options)
-		res.options = propSpec[key].options;
+	// Create entries with category information
+	const entries = stateKeys.map(key => {
+		const res = {
+			key,
+			value: state[key],
+			category: categorizeEntry(key)
+		};
 
-	return res;
-});
+		if (propSpec && propSpec[key]?.options)
+			res.options = propSpec[key].options;
 
-// Track rendered properties to ensure they only appear in one section
-const renderedProperties = new Set();
+		return res;
+	});
 
-// Group entries by category
-const categorizedEntries = {
-	custom: entries.filter(entry => entry.category === 'custom'),
-	cssAttributes: entries.filter(entry => entry.category === 'cssAttributes'),
-	cssVariables: entries.filter(entry => entry.category === 'cssVariables'),
-	internal: entries.filter(entry => entry.category === 'internal'),
-	cssClasses: entries.filter(entry => entry.category === 'cssClasses'),
-	own: entries.filter(entry => entry.category === 'own'),
-	other: entries.filter(entry => entry.category === 'other')
-};
+	// Track rendered properties to ensure they only appear in one section
+	const renderedProperties = new Set();
 
-// Section titles
-const sectionTitles = {
-	custom: 'Custom',
-	cssAttributes: 'CSS Attributes',
-	cssVariables: 'CSS Variables',
-	internal: 'Internal',
-	cssClasses: 'CSS Classes',
-	own: 'Own',
-	other: 'Other'
-};
+	// Group entries by category
+	const categorizedEntries = {
+		custom: entries.filter(entry => entry.category === 'custom'),
+		cssAttributes: entries.filter(entry => entry.category === 'cssAttributes'),
+		cssVariables: entries.filter(entry => entry.category === 'cssVariables'),
+		internal: entries.filter(entry => entry.category === 'internal'),
+		cssClasses: entries.filter(entry => entry.category === 'cssClasses'),
+		own: entries.filter(entry => entry.category === 'own'),
+		other: entries.filter(entry => entry.category === 'other')
+	};
 
-// Define the order of sections to ensure properties are rendered in the correct order
-const sectionOrder = ['custom', 'own', 'cssAttributes', 'cssVariables', 'cssClasses', 'internal', 'other'];
+	// Section titles
+	const sectionTitles = {
+		custom: 'Custom',
+		cssAttributes: 'CSS Attributes',
+		cssVariables: 'CSS Variables',
+		internal: 'Internal',
+		cssClasses: 'CSS Classes',
+		own: 'Own',
+		other: 'Other'
+	};
 
-// Create sections for each category in the defined order
-sectionOrder.forEach(category => {
+	// Define the order of sections to ensure properties are rendered in the correct order
+	const sectionOrder = ['custom', 'own', 'cssAttributes', 'cssVariables', 'cssClasses', 'internal', 'other'];
+
+	// Create sections for each category in the defined order
+	sectionOrder.forEach(category => {
 	// Filter out properties that have already been rendered
-	const categoryEntries = categorizedEntries[category].filter(entry => !renderedProperties.has(entry.key));
-	
-	// Skip empty categories
-	if (categoryEntries.length === 0) return;
-	
-	// Add all properties in this section to the rendered set
-	categoryEntries.forEach(entry => renderedProperties.add(entry.key));
-	
-	// Create section for this category
-	const categorySection = createElement({
-		type: 'div',
-		className: 'state-category',
-		parent: stateSection
-	});
-	
-	// Add category title with collapse/expand functionality
-	const headerElement = createElement({
-		type: 'div',
-		className: 'category-header',
-		parent: categorySection
-	});
-	
-	// Add collapse/expand icon
-	const collapseIcon = createElement({
-		type: 'span',
-		className: 'collapse-icon',
-		textContent: '▼', // Down arrow for expanded state
-		parent: headerElement
-	});
-	
-	// Add space after icon
-	headerElement.appendChild(document.createTextNode(' '));
-	
-	// Add title text
-	createElement({
-		type: 'span',
-		textContent: sectionTitles[category],
-		parent: headerElement
-	});
-	
-	// Create content container that can be collapsed
-	// Start with collapsed state for all sections except 'custom' and 'own'
-	const shouldBeCollapsed = category !== 'custom' && category !== 'own';
-	const contentContainer = createElement({
-		type: 'div',
-		className: `category-content${shouldBeCollapsed ? ' collapsed' : ''}`,
-		parent: categorySection
-	});
-	
-	// Set initial collapse icon based on collapsed state
-	collapseIcon.textContent = shouldBeCollapsed ? '▶' : '▼';
-	
-	// Add click event to header for collapsing/expanding
-	headerElement.addEventListener('click', (e) => {
-		// Toggle the collapsed state
-		contentContainer.classList.toggle('collapsed');
-		// Toggle the icon
-		collapseIcon.textContent = contentContainer.classList.contains('collapsed') ? '▶' : '▼';
-	});
-		
-	// Add entries for this category to the content container
-	categoryEntries.forEach(({ key, value, options }) => {
-		const propertyContainer = createElement({
+		const categoryEntries = categorizedEntries[category].filter(entry => !renderedProperties.has(entry.key));
+
+		// Skip empty categories
+		if (categoryEntries.length === 0) return;
+
+		// Add all properties in this section to the rendered set
+		categoryEntries.forEach(entry => renderedProperties.add(entry.key));
+
+		// Create section for this category
+		const categorySection = createElement({
 			type: 'div',
-			className: 'state-property',
-			parent: contentContainer
+			className: 'state-category',
+			parent: stateSection
 		});
+
+		// Add category title with collapse/expand functionality
+		const headerElement = createElement({
+			type: 'div',
+			className: 'category-header',
+			parent: categorySection
+		});
+
+		// Add collapse/expand icon
+		const collapseIcon = createElement({
+			type: 'span',
+			className: 'collapse-icon',
+			textContent: '▼', // Down arrow for expanded state
+			parent: headerElement
+		});
+
+		// Add space after icon
+		headerElement.appendChild(document.createTextNode(' '));
+
+		// Add title text
+		createElement({
+			type: 'span',
+			textContent: sectionTitles[category],
+			parent: headerElement
+		});
+
+		// Create content container that can be collapsed
+		// Start with collapsed state for all sections except 'custom' and 'own'
+		const shouldBeCollapsed = category !== 'custom' && category !== 'own';
+		const contentContainer = createElement({
+			type: 'div',
+			className: `category-content${shouldBeCollapsed ? ' collapsed' : ''}`,
+			parent: categorySection
+		});
+
+		// Set initial collapse icon based on collapsed state
+		collapseIcon.textContent = shouldBeCollapsed ? '▶' : '▼';
+
+		// Add click event to header for collapsing/expanding
+		headerElement.addEventListener('click', e => {
+		// Toggle the collapsed state
+			contentContainer.classList.toggle('collapsed');
+			// Toggle the icon
+			collapseIcon.textContent = contentContainer.classList.contains('collapsed') ? '▶' : '▼';
+		});
+
+		// Add entries for this category to the content container
+		categoryEntries.forEach(({ key, value, options }) => {
+			const propertyContainer = createElement({
+				type: 'div',
+				className: 'state-property',
+				parent: contentContainer
+			});
 
 			// Create the property key
 			createElement({
@@ -196,6 +198,7 @@ sectionOrder.forEach(category => {
 						change: e => {
 							chrome.runtime.sendMessage({
 								action: 'OPUS_ASK_SET_COMPONENT_STATE',
+								tabId,
 								data: {
 									target: componentId,
 									key,
@@ -220,6 +223,7 @@ sectionOrder.forEach(category => {
 							const newValue = e.target.valueAsNumber;
 							chrome.runtime.sendMessage({
 								action: 'OPUS_ASK_SET_COMPONENT_STATE',
+								tabId,
 								data: {
 									target: componentId,
 									key,
@@ -237,7 +241,7 @@ sectionOrder.forEach(category => {
 						className: 'custom-dropdown-container',
 						parent: propertyContainer
 					});
-					
+
 					// Create the value display element
 					const valueDisplay = createElement({
 						type: 'span',
@@ -245,31 +249,31 @@ sectionOrder.forEach(category => {
 						textContent: value,
 						parent: dropdownContainer
 					});
-					
+
 					// Create a custom dropdown trigger
 					const dropdownTrigger = createElement({
 						type: 'div',
 						className: 'custom-dropdown-trigger',
 						parent: dropdownContainer,
 						events: {
-							click: (e) => {
+							click: e => {
 								e.stopPropagation(); // Prevent the document click handler from firing
-								
+
 								// Close any existing dropdown
 								closeActiveDropdown();
-								
+
 								// Create and position the dropdown
 								const dropdown = createElement({
 									type: 'div',
 									className: 'custom-dropdown',
 									parent: document.body // Append to body to avoid containment issues
 								});
-								
+
 								// Calculate position
 								const rect = dropdownTrigger.getBoundingClientRect();
 								dropdown.style.top = `${rect.bottom}px`;
 								dropdown.style.left = `${rect.left}px`;
-								
+
 								// Add options to the dropdown
 								options.forEach(optionValue => {
 									const option = createElement({
@@ -277,48 +281,48 @@ sectionOrder.forEach(category => {
 										className: `dropdown-option ${optionValue === value ? 'selected' : ''}`,
 										textContent: optionValue,
 										events: {
-											click: (e) => {
+											click: e => {
 												e.stopPropagation();
-												
+
 												// Update the value display text
 												valueDisplay.textContent = optionValue;
-												
+
 												// Send the update message
 												chrome.runtime.sendMessage({
 													action: 'OPUS_ASK_SET_COMPONENT_STATE',
+													tabId,
 													data: {
 														target: componentId,
 														key,
 														value: optionValue
 													}
 												});
-												
+
 												// Close the dropdown
 												closeActiveDropdown();
 											},
-											mouseover: (e) => {
+											mouseover: e => {
 												e.target.style.backgroundColor = 'var(--select-bg)';
 											},
-											mouseout: (e) => {
-												if (optionValue !== value) {
+											mouseout: e => {
+												if (optionValue !== value)
 													e.target.style.backgroundColor = 'transparent';
-												}
 											}
 										},
 										parent: dropdown
 									});
 								});
-								
+
 								// Store the active dropdown
 								activeDropdown = dropdown;
 							}
 						}
 					});
-					
+
 					// Add the value display to the trigger
 					valueDisplay.remove(); // Remove from container
 					dropdownTrigger.appendChild(valueDisplay); // Add to trigger
-					
+
 					// Add a dropdown indicator
 					createElement({
 						type: 'span',
@@ -340,6 +344,7 @@ sectionOrder.forEach(category => {
 							input: e => {
 								chrome.runtime.sendMessage({
 									action: 'OPUS_ASK_SET_COMPONENT_STATE',
+									tabId,
 									data: {
 										target: componentId,
 										key,

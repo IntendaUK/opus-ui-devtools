@@ -10,9 +10,7 @@ if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
 		onSelectComponentClick: id => {
 			window.postMessage({
 				type: 'OPUS_GET_SELECT_COMPONENT',
-				data: {
-					id
-				}
+				data: { id }
 			}, '*');
 		}
 	};
@@ -36,9 +34,7 @@ if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
 
 			window.postMessage({
 				type: 'OPUS_GET_OPUS_CONFIG',
-				data: {
-					opusConfig
-				}
+				data: { opusConfig }
 			}, '*');
 		} else if (event.data.type === 'OPUS_ASK_SHOW_OVERLAY')
 			window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
@@ -71,9 +67,7 @@ if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
 				if (!!window.opus || !!document.querySelector('#POPOVERS.cpnContainerSimple')) {
 					window.postMessage({
 						type: 'OPUS_GET_IS_OPUS_APP',
-						data: {
-							result: true
-						}
+						data: { result: true }
 					});
 				} else if (attemptsLeft > 0)
 					setTimeout(checkIfOpusExists, delayBetweenAttempts);

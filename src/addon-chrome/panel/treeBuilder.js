@@ -3,6 +3,8 @@
 import { getScopeColorByDepth } from './colors.js';
 import { createElement } from './domHelper.js';
 
+const tabId = chrome.devtools.inspectedWindow.tabId;
+
 // Build a tree map from flat nodes
 const buildTreeMap = flatNodes => {
 	const childrenMap = new Map();
@@ -45,6 +47,7 @@ export const selectTreeNode = ({ id, doScroll = true }) => {
 	// Request state for this component
 	chrome.runtime.sendMessage({
 		action: 'OPUS_ASK_STATE_DATA',
+		tabId,
 		data: { id }
 	});
 
@@ -61,7 +64,7 @@ export const selectTreeNode = ({ id, doScroll = true }) => {
 };
 
 // Toggle the visibility of a node's children
-const toggleNodeChildren = (nodeId) => {
+const toggleNodeChildren = nodeId => {
 	const childContainer = document.querySelector(`.child-container[data-parent-id="${nodeId}"]`);
 	if (!childContainer) return;
 
@@ -80,15 +83,16 @@ const toggleNodeChildren = (nodeId) => {
 const nodeMatchesFilter = (node, childrenMap, filters) => {
 	// If no filters are provided or filters is empty, everything matches
 	if (!filters || filters.size === 0) return true;
-	
+
 	// Check if this node's type passes the filter
 	const typeMatches = filters.get(node.type) !== false;
-	
+
 	// If this node matches, return true immediately
 	if (typeMatches) return true;
-	
+
 	// If this node doesn't match, check its children recursively
 	const children = childrenMap.get(node.id) || [];
+
 	return children.some(child => nodeMatchesFilter(child, childrenMap, filters));
 };
 
@@ -104,10 +108,10 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 		// Check if this node or any of its children match the filter
 		const nodeMatches = !filters || nodeMatchesFilter(node, childrenMap, filters);
 		const typeMatches = !filters || filters.get(node.type) !== false;
-		
+
 		// Skip this node entirely if it doesn't match and none of its children match
 		if (!nodeMatches) return;
-		
+
 		// Create a node container to hold the line and its scope indicators
 		const nodeContainer = createElement({
 			type: 'div',
@@ -145,7 +149,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 		const lineContainer = createElement({
 			type: 'div',
 			className: 'line-container',
-			style: { 
+			style: {
 				display: 'flex',
 				alignItems: 'center'
 			},
@@ -170,7 +174,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 				dataset: { nodeId: node.id },
 				attributes: { title: 'Collapse' },
 				events: {
-					click: (e) => {
+					click: e => {
 						e.stopPropagation(); // Prevent triggering the line click event
 						toggleNodeChildren(node.id);
 					}
@@ -198,16 +202,23 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 			dataset: { componentId: node.id },
 			events: {
 				click: () => {
-					selectTreeNode({ id: node.id, doScroll: false });
+					selectTreeNode({
+						id: node.id,
+						doScroll: false
+					});
 				},
 				mouseenter: () => {
 					chrome.runtime.sendMessage({
 						action: 'OPUS_ASK_SHOW_OVERLAY',
+						tabId,
 						data: { id: node.id }
 					});
 				},
 				mouseleave: () => {
-					chrome.runtime.sendMessage({ action: 'OPUS_ASK_HIDE_OVERLAY' });
+					chrome.runtime.sendMessage({
+						action: 'OPUS_ASK_HIDE_OVERLAY',
+						tabId
+					});
 				}
 			},
 			parent: lineContainer
@@ -277,12 +288,15 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 		// Recursively create child container with current node's scopes
 		const childContainer = createHtmlFromTree(node.id, childrenMap, depth + 1, scopeDepth + (nodeScopes.length ?? 0), nodeScopes, filters);
 		childContainer.style.position = 'relative'; // For proper positioning of child scope lines
-		
+
 		// Create a wrapper for the child container with data attribute for parent ID
 		const childWrapper = createElement({
 			type: 'div',
 			className: 'child-container',
-			style: { position: 'relative', display: 'block' }, // Default to expanded
+			style: {
+				position: 'relative',
+				display: 'block'
+			}, // Default to expanded
 			dataset: { parentId: node.id },
 			parent: container
 		});
@@ -305,7 +319,7 @@ const createHtmlFromTree = (parentId, childrenMap, depth = 0, scopeDepth = 0, pa
 				});
 			});
 		}
-		
+
 		// Add the child container to the wrapper
 		childWrapper.appendChild(childContainer);
 	});
