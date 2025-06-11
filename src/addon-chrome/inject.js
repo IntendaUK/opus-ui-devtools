@@ -20,7 +20,12 @@ if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
 			const id = event.data.data.id;
 			const originalState = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
 
-			const state = JSON.parse(JSON.stringify(originalState));
+			//If the state contains a ref (inputs), remove it
+			const shallowCopiedState = { ...originalState };
+			shallowCopiedState.state = { ...shallowCopiedState.state };
+			delete shallowCopiedState.state.boxRef;
+
+			const state = JSON.parse(JSON.stringify(shallowCopiedState));
 
 			window.postMessage({
 				type: 'OPUS_GET_STATE_DATA',

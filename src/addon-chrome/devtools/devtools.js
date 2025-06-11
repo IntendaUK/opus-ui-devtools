@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(message => {
 	) {
 		// Only create the panel if window.opus exists and panel hasn't been created yet
 		chrome.devtools.panels.create(
-			'Opus UI',
+			'Opus UI Dev',
 			'../favicon.png',
 			'../panel/panel.html'
 		);

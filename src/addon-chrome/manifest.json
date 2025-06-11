@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "Opus UI DevTools",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"permissions": [
 		"activeTab"
 	],

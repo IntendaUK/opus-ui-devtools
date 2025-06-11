@@ -8,3 +8,6 @@
 * Click to copy component path
 * Clicking on flows source/target with a scoped id doesn't work
 * Hovering on elements that don't exist in the dom should not give an error (perhaps show the parent instead...would help for dataloaders)
+* See if object/array is empty
+* Button to scroll to the selected element again in the tryy
+* Don't show id/scope/relId for greyed out (filtered out) nodes

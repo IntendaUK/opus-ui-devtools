@@ -1,13 +1,18 @@
+/* eslint-disable max-lines-per-function, no-inline-comments, max-lines */
+
 import { buildTreeMap, createHtmlFromTree, selectTreeNode } from './treeBuilder.js';
 import { displayStateInSidebar } from './stateDisplay/index.js';
 import { set as setGlobalConfig } from './globalConfig.js';
+import findUniqueTestId from './findUniqueTestId.js';
 import './search.js';
 
 const tabId = chrome.devtools.inspectedWindow.tabId;
 
 let domData;
+let selectedComponentId;
 let componentTypeFilters = new Map(); // Map to store component type filters
 let filterDropdown = null; // Reference to the filter dropdown element
+let testIdDropdown = null; // Reference to the test id dropdown element
 
 // Function to get all unique component types from the data
 const getComponentTypes = () => {
@@ -20,6 +25,126 @@ const getComponentTypes = () => {
 	});
 
 	return Array.from(types).sort();
+};
+
+// Function to handle clicks on a test ID item
+const onClickFindTestId = clickedType => {
+	findUniqueTestId(selectedComponentId, clickedType);
+};
+
+// Function to create the Test ID dropdown
+const createTestIdDropdown = () => {
+	// If a dropdown already exists, remove it
+	const existing = document.getElementById('testid-dropdown');
+	if (existing)
+		existing.remove();
+
+	// Create the dropdown container
+	testIdDropdown = document.createElement('div');
+	testIdDropdown.className = 'dropdown';
+	testIdDropdown.id = 'testid-dropdown';
+
+	// Optional: a header or title for the dropdown
+	const header = document.createElement('div');
+	header.className = 'dropdown-header';
+	header.textContent = 'Select Test ID';
+	testIdDropdown.appendChild(header);
+
+	// List of test ID types
+	const testIdTypes = ['Basic', 'Input', 'Click'];
+
+	// Create a container for the items
+	const content = document.createElement('div');
+	content.className = 'dropdown-content';
+	testIdDropdown.appendChild(content);
+
+	// For each type, create a clickable item
+	testIdTypes.forEach(type => {
+		const item = document.createElement('div');
+		item.className = 'dropdown-item';
+		item.textContent = type;
+
+		item.addEventListener('click', e => {
+			e.stopPropagation();
+			onClickFindTestId(type);
+			testIdDropdown.classList.toggle('visible', false);
+		});
+
+		content.appendChild(item);
+	});
+
+	document.querySelector('.search-wrapper').appendChild(testIdDropdown);
+
+	// ────────────────────────────────────────────────────────────────────────────
+	// New "Resolve Test ID" section
+	// ────────────────────────────────────────────────────────────────────────────
+	const resolveHeader = document.createElement('div');
+	resolveHeader.className = 'dropdown-header';
+	resolveHeader.textContent = 'Resolve Test ID';
+	testIdDropdown.appendChild(resolveHeader);
+
+	const resolveContainer = document.createElement('div');
+	resolveContainer.className = 'resolve-container';
+
+	const input = document.createElement('input');
+	input.type = 'text';
+	input.className = 'resolve-input';
+	input.placeholder = 'Enter selector';
+	resolveContainer.appendChild(input);
+
+	const button = document.createElement('button');
+	button.className = 'resolve-button';
+	button.textContent = 'Resolve';
+	resolveContainer.appendChild(button);
+
+	testIdDropdown.appendChild(resolveContainer);
+
+	// Helper to run the query in the inspected window and log the count
+	const runQuery = () => {
+		const selector = input.value.trim();
+		if (!selector)
+			return;
+
+		chrome.devtools.inspectedWindow.eval(
+			`(() => {
+			 const els = document.querySelectorAll(${JSON.stringify(selector)});
+			 // always dump the NodeList
+			 console.log('Matched elements:', els);
+			 const n = els.length;
+			 if (n > 1) {
+			   console.error(\`❌ \${n} element(s) matched. Invalid selector.\`);
+			 } else {
+			   console.log(\`🧮 \${n} element(s) found for selector.\`);
+			 }
+			 return n;
+			})()`,
+			(count, exceptionDetails) => {
+				if (exceptionDetails) {
+					// if the snippet itself blew up, report here:
+					console.error('Error running selector-check snippet:', exceptionDetails);
+				}
+				// otherwise everything (logs + errors) already fired in the *page* console
+			}
+		);
+
+		testIdDropdown.classList.toggle('visible', false);
+		input.value = '';
+	};
+
+	// Wire up Enter key and button click
+	input.addEventListener('keydown', e => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			runQuery();
+		}
+	});
+	button.addEventListener('click', e => {
+		e.stopPropagation();
+		runQuery();
+	});
+
+	// Return the dropdown element in case the caller needs it
+	return testIdDropdown;
 };
 
 // Function to create the filter dropdown
@@ -141,6 +266,28 @@ const toggleFilterDropdown = () => {
 	}
 };
 
+// Function to toggle the test dropdown visibility
+const toggleTestDropdown = () => {
+	if (!testIdDropdown)
+		createTestIdDropdown();
+
+	const isVisible = testIdDropdown.classList.contains('visible');
+	testIdDropdown.classList.toggle('visible', !isVisible);
+
+	// Add a click event listener to close the dropdown when clicking outside
+	if (!isVisible) {
+		setTimeout(() => {
+			const closeDropdownOnOutsideClick = e => {
+				if (!testIdDropdown.contains(e.target) && e.target.id !== 'test-btn') {
+					testIdDropdown.classList.remove('visible');
+					document.removeEventListener('click', closeDropdownOnOutsideClick);
+				}
+			};
+			document.addEventListener('click', closeDropdownOnOutsideClick);
+		}, 0);
+	}
+};
+
 // Function to check if a node or any of its children match the filter
 const nodeMatchesFilter = (node, childrenMap) => {
 	// Check if this node's type passes the filter
@@ -214,9 +361,12 @@ chrome.runtime.onMessage.addListener(message => {
 	else if (message.action === 'OPUS_GET_STATE_DATA') {
 		const { data: { id, state } } = message;
 
+		selectedComponentId = id;
+
 		const domNode = domData.find(f => f.id === id);
 
 		displayStateInSidebar(state, id, domNode);
+		document.getElementById('test-btn').classList.toggle('hidden', false);
 	} else if (message.action === 'OPUS_GET_SELECT_COMPONENT') {
 		selectTreeNode({ id: message.data.id });
 
@@ -230,6 +380,7 @@ chrome.runtime.onMessage.addListener(message => {
 document.addEventListener('DOMContentLoaded', () => {
 	const selectComponentBtn = document.getElementById('select-component-btn');
 	const filterBtn = document.getElementById('filter-btn');
+	const testBtn = document.getElementById('test-btn');
 
 	// Toggle select component button
 	selectComponentBtn.addEventListener('click', () => {
@@ -240,6 +391,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	filterBtn.addEventListener('click', e => {
 		e.stopPropagation();
 		toggleFilterDropdown();
+	});
+
+	// Toggle filter dropdown
+	testBtn.addEventListener('click', e => {
+		e.stopPropagation();
+		toggleTestDropdown();
 	});
 
 	// Sidebar resize functionality
