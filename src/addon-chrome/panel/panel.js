@@ -29,7 +29,10 @@ const getComponentTypes = () => {
 
 // Function to handle clicks on a test ID item
 const onClickFindTestId = clickedType => {
-	findUniqueTestId(selectedComponentId, clickedType);
+	const filtered = clickedType.includes('Filtered');
+	clickedType = clickedType.replace('Filtered ', '');
+
+	findUniqueTestId(selectedComponentId, clickedType, filtered);
 };
 
 // Function to create the Test ID dropdown
@@ -51,7 +54,7 @@ const createTestIdDropdown = () => {
 	testIdDropdown.appendChild(header);
 
 	// List of test ID types
-	const testIdTypes = ['Basic', 'Input', 'Click'];
+	const testIdTypes = ['Basic', 'Input', 'Click', 'Filtered Click'];
 
 	// Create a container for the items
 	const content = document.createElement('div');
