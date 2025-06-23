@@ -77,4 +77,40 @@ const createElement = options => {
 	return element;
 };
 
-export { createElement };
+const showToast = message => {
+       let container = document.getElementById('toast-container');
+       if (!container) {
+               container = document.createElement('div');
+               container.id = 'toast-container';
+               document.body.appendChild(container);
+       }
+
+       const toast = document.createElement('div');
+       toast.className = 'toast';
+       toast.textContent = message;
+       container.appendChild(toast);
+
+       requestAnimationFrame(() => toast.classList.add('visible'));
+       setTimeout(() => {
+               toast.classList.remove('visible');
+               toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+       }, 2000);
+};
+
+const copyToClipboard = (text, message = 'Copied to clipboard') => {
+       if (navigator.clipboard)
+               navigator.clipboard.writeText(text).then(() => showToast(message));
+        else {
+               const input = document.createElement('textarea');
+               input.value = text;
+               input.style.position = 'absolute';
+               input.style.left = '-9999px';
+               document.body.appendChild(input);
+               input.select();
+               document.execCommand('copy');
+               input.remove();
+               showToast(message);
+       }
+};
+
+export { createElement, copyToClipboard };
