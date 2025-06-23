@@ -1,4 +1,4 @@
-import { createElement } from '../../domHelper.js';
+import { createElement, copyToClipboard } from '../../domHelper.js';
 
 const getShortId = id => {
 	const displayId = id.length > 9 ? `${id.substring(0, 8)}&hellip;` : id;
@@ -21,20 +21,26 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
 	});
 
 	// ID
-	createElement({
-		type: 'div',
-		className: 'state-property',
-		innerHTML: `<span class="property-key">id:</span> ${getShortId(componentId)}`,
-		parent: metadataSection
-	});
+       createElement({
+               type: 'div',
+               className: ['state-property', 'copyable'],
+               innerHTML: `<span class="property-key">id:</span> ${getShortId(componentId)}`,
+               attributes: { title: componentId },
+               dataset: { tooltip: componentId },
+               events: { click: () => copyToClipboard(componentId) },
+               parent: metadataSection
+       });
 
 	// Parent ID
-	createElement({
-		type: 'div',
-		className: 'state-property',
-		innerHTML: `<span class="property-key">parent id:</span> ${getShortId(state.parentId)}`,
-		parent: metadataSection
-	});
+       createElement({
+               type: 'div',
+               className: ['state-property', 'copyable'],
+               innerHTML: `<span class="property-key">parent id:</span> ${getShortId(state.parentId)}`,
+               attributes: { title: state.parentId },
+               dataset: { tooltip: state.parentId },
+               events: { click: () => copyToClipboard(state.parentId) },
+               parent: metadataSection
+       });
 
 	// Index in parent
 	createElement({
