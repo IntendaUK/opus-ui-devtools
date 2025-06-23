@@ -32,8 +32,6 @@ const onClickFindTestId = clickedType => {
 	const isGridCell = clickedType.includes('Grid Cell');
 	clickedType = clickedType.replace('Grid Cell ', '');
 
-	console.log(123);
-
 	chrome.runtime.sendMessage({
 		action: 'OPUS_ASK_BUILD_TEST_ID_LOCATOR',
 		data: {

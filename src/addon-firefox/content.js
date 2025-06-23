@@ -43,7 +43,6 @@ script.textContent = `
 					}
 				}, '*');
 			} else if (event.data.type === 'OPUS_ASK_BUILD_TEST_ID_LOCATOR') {
-	console.log(123);
 				const testIdLocator = window._OPUS_DEVTOOLS_GLOBAL_HOOK.buildTestIdLocator(event.data.data);
 
 				window.postMessage({
