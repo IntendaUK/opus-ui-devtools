@@ -42,6 +42,14 @@ script.textContent = `
 						opusConfig
 					}
 				}, '*');
+			} else if (event.data.type === 'OPUS_ASK_BUILD_TEST_ID_LOCATOR') {
+	console.log(123);
+				const testIdLocator = window._OPUS_DEVTOOLS_GLOBAL_HOOK.buildTestIdLocator(event.data.data);
+
+				window.postMessage({
+					type: 'OPUS_GET_BUILD_TEST_ID_LOCATOR',
+					data: { testIdLocator }
+				}, '*');
 			} else if (event.data.type === 'OPUS_ASK_SHOW_OVERLAY')
 				window._OPUS_DEVTOOLS_GLOBAL_HOOK.showOverlay(event.data.data.id);
 			else if (event.data.type === 'OPUS_ASK_HIDE_OVERLAY')

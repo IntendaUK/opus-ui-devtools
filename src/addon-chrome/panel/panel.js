@@ -3,7 +3,6 @@
 import { buildTreeMap, createHtmlFromTree, selectTreeNode } from './treeBuilder.js';
 import { displayStateInSidebar } from './stateDisplay/index.js';
 import { set as setGlobalConfig } from './globalConfig.js';
-import findUniqueTestId from './findUniqueTestId.js';
 import './search.js';
 
 const tabId = chrome.devtools.inspectedWindow.tabId;
@@ -29,10 +28,22 @@ const getComponentTypes = () => {
 
 // Function to handle clicks on a test ID item
 const onClickFindTestId = clickedType => {
-	const filtered = clickedType.includes('Filtered');
+	const isFiltered = clickedType.includes('Filtered');
 	clickedType = clickedType.replace('Filtered ', '');
 
-	findUniqueTestId(selectedComponentId, clickedType, filtered);
+	const isGridCell = clickedType.includes('Grid Cell');
+	clickedType = clickedType.replace('Grid Cell ', '');
+
+	chrome.runtime.sendMessage({
+		action: 'OPUS_ASK_BUILD_TEST_ID_LOCATOR',
+		tabId,
+		data: {
+			elementId: selectedComponentId,
+			findType: clickedType,
+			isFiltered,
+			isGridCell
+		}
+	});
 };
 
 // Function to create the Test ID dropdown
@@ -54,7 +65,14 @@ const createTestIdDropdown = () => {
 	testIdDropdown.appendChild(header);
 
 	// List of test ID types
-	const testIdTypes = ['Basic', 'Input', 'Click', 'Filtered Click'];
+	const testIdTypes = [
+		'Basic',
+		'Input',
+		'Click',
+		'Filtered Click',
+		'Grid Cell Click',
+		'Grid Cell Input'
+	];
 
 	// Create a container for the items
 	const content = document.createElement('div');
@@ -396,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		toggleFilterDropdown();
 	});
 
-	// Toggle filter dropdown
+	// Toggle test dropdown
 	testBtn.addEventListener('click', e => {
 		e.stopPropagation();
 		toggleTestDropdown();
