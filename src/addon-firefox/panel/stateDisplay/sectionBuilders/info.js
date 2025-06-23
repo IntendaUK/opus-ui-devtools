@@ -26,6 +26,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
                className: ['state-property', 'copyable'],
                innerHTML: `<span class="property-key">id:</span> ${getShortId(componentId)}`,
                attributes: { title: componentId },
+               dataset: { tooltip: componentId },
                events: { click: () => copyToClipboard(componentId) },
                parent: metadataSection
        });
@@ -36,6 +37,7 @@ const buildSectionInfo = (stateContent, componentId, domNode, state) => {
                className: ['state-property', 'copyable'],
                innerHTML: `<span class="property-key">parent id:</span> ${getShortId(state.parentId)}`,
                attributes: { title: state.parentId },
+               dataset: { tooltip: state.parentId },
                events: { click: () => copyToClipboard(state.parentId) },
                parent: metadataSection
        });
