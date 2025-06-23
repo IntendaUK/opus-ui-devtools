@@ -98,9 +98,20 @@ const showToast = message => {
 };
 
 const copyToClipboard = (text, message = 'Copied to clipboard') => {
-       if (navigator.clipboard)
-               navigator.clipboard.writeText(text).then(() => showToast(message));
-        else {
+       const devtoolsEval = chrome?.devtools?.inspectedWindow?.eval;
+       const snippet = `(() => {
+               const input = document.createElement('textarea');
+               input.value = ${JSON.stringify(text)};
+               input.style.position = 'absolute';
+               input.style.left = '-9999px';
+               document.body.appendChild(input);
+               input.select();
+               document.execCommand('copy');
+               input.remove();
+       })()`;
+
+       if (devtoolsEval) devtoolsEval(snippet);
+       else {
                const input = document.createElement('textarea');
                input.value = text;
                input.style.position = 'absolute';
@@ -109,8 +120,9 @@ const copyToClipboard = (text, message = 'Copied to clipboard') => {
                input.select();
                document.execCommand('copy');
                input.remove();
-               showToast(message);
        }
+
+       showToast(message);
 };
 
 export { createElement, copyToClipboard };
