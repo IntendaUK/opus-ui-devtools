@@ -1,4 +1,25 @@
 if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
+	const getSerializableState = value => {
+		const seen = new WeakSet();
+
+		return JSON.parse(JSON.stringify(value, (key, item) => {
+			if (item instanceof Element)
+				return `[${item.tagName.toLowerCase()} element]`;
+
+			if (item instanceof Node)
+				return `[${item.nodeName.toLowerCase()} node]`;
+
+			if (typeof item === 'object' && item !== null) {
+				if (seen.has(item))
+					return '[Circular]';
+
+				seen.add(item);
+			}
+
+			return item;
+		}));
+	};
+
 	window._OPUS_DEVTOOLS_GLOBAL_HOOK = {
 		onDomChanged: dom => {
 			window.postMessage({
@@ -19,13 +40,7 @@ if (!window._OPUS_DEVTOOLS_GLOBAL_HOOK) {
 		if (event.data.type === 'OPUS_ASK_STATE_DATA') {
 			const id = event.data.data.id;
 			const originalState = window._OPUS_DEVTOOLS_GLOBAL_HOOK.getState(id);
-
-			//If the state contains a ref (inputs), remove it
-			const shallowCopiedState = { ...originalState };
-			shallowCopiedState.state = { ...shallowCopiedState.state };
-			delete shallowCopiedState.state.boxRef;
-
-			const state = JSON.parse(JSON.stringify(shallowCopiedState));
+			const state = getSerializableState(originalState);
 
 			window.postMessage({
 				type: 'OPUS_GET_STATE_DATA',
